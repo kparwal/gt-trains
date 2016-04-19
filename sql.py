@@ -92,7 +92,7 @@ class GTTrains:
                 return
         data = self.Connect()
         cursor = data.cursor()
-        cursor.execute('SELECT Username,Email FROM Customer')
+        cursor.execute('SELECT Username,Email FROM Customer NATURAL LEFT JOIN Manager UNION SELECT Username,Email FROM Customer NATURAL RIGHT JOIN Manager')
         usernames = cursor.fetchall()
         cursor.close()
         data.close()
