@@ -82,9 +82,6 @@ class GTTrains:
 
         win2.pack()
 
-    def exit(self):
-        self.win.destroy()
-
     def checkRegistration(self):
         for item in self.entrys:
             if item.get() == "":
@@ -121,22 +118,32 @@ class GTTrains:
         self.win.deiconify()
     
     def login(self):
+        userpass = [(),()]
         data = self.Connect()
         cursor = data.cursor()
         cursor.execute('SELECT Password FROM Customer WHERE Username ="{}"'.format(self.username.get()))
-        userpass = cursor.fetchone()
+        userpass[0] = cursor.fetchone()
+        cursor.execute('SELECT Password FROM Manager WHERE Username ="{}"'.format(self.username.get()))
+        userpass[1] = cursor.fetchone()
         cursor.close()
         data.close()
-        if (userpass != () and userpass != None):
-            if (self.password.get() == userpass[0]):
+        if (userpass[0] != () and userpass[0] != None):
+            if (self.password.get() == userpass[0][0]):
                 messagebox.showinfo("Login Successful!", "You are now logged in")
-                self.win.withdraw()
-                #calls the big window with the user data
-                self.personalUserData()
+                #self.win.withdraw()
+                #calls the functionality window with the user data
+            else:
+                messagebox.showerror("Invalid Password","Please check that the password is correct!")
+        elif (userpass[1] != () and userpass[1] != None):
+            if (self.password.get() == userpass[1][0]):
+                messagebox.showinfo("Login Successful!", "You are now logged in as a manager")
+                #self.win.withdraw()
+                #calls the functionality window with the manager data
             else:
                 messagebox.showerror("Invalid Password","Please check that the password is correct!")
         else:
             messagebox.showerror("Invalid Username","Please Enter A Valid Username Or Try Registering")
+
 
     def Connect(self):
         try:
