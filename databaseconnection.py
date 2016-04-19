@@ -8,9 +8,10 @@ def Connect():
 
 data = self.Connect()
 cursor = data.cursor()
+#add for loops and what not here to iteratively add data
 query = 'INSERT INTO Travelers(Username,Password,LastName)VALUES("{0}","{1}","{2}")'.format(self.user.get(),self.pass1.get(),self.name.get())
 cursor.execute(query)
-userpass = cursor.fetchone()
+#easy
 data.commit()
 cursor.close()
 data.close()
