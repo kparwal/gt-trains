@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import urllib.request
 import pymysql
 from re import findall
@@ -46,24 +47,24 @@ class GTTrains:
         canvas.create_image(50,50, anchor=CENTER, image=self.image)
         win2 = Frame(self.winregister)
 
-        self.name = StringVar()
         self.user = StringVar()
+        self.email = StringVar()
         self.pass1 = StringVar()
         self.pass2 = StringVar()
-        self.entrys = [self.name, self.user, self.pass1, self.pass2]
+        self.entrys = [self.user, self.email, self.pass1, self.pass2]
 
-        lb0 = Label(win2, text = "Last Name:")
+        lb0 = Label(win2, text = "Username:")
         lb0.grid(row=0,column=0, sticky=W)
 
-        e0 = Entry(win2, textvariable = self.name)
+        e0 = Entry(win2, textvariable = self.user)
         e0.grid(row=0,column=1, columnspan=4)
 
-        lb1 = Label(win2, text = "Username:")
+        lb1 = Label(win2, text = "Email:")
         lb1.grid(row=1,column=0, sticky=W)
-
-        e1 = Entry(win2, textvariable = self.user)
-        e1.grid(row=1,column=1, columnspan=4)
-
+        
+        e0 = Entry(win2, textvariable = self.email)
+        e0.grid(row=1,column=1, columnspan=4)
+        
         lb2 = Label(win2, text = "Password:")
         lb2.grid(row=2,column=0, sticky=W)
 
@@ -75,22 +76,50 @@ class GTTrains:
 
         e2 = Entry(win2, textvariable = self.pass2, show ="*")
         e2.grid(row=3,column=1, columnspan=4)
-
-        b1 = Button(win2, text = "Cancel", command = self.cancel)
-        b1.grid(row=4,column=2, sticky=EW)
-
-        b2 = Button(win2, text = "Register", command = self.checkRegistration)
-        b2.grid(row=4,column=3,columnspan=2, sticky=EW)
+        
+        b2 = Button(win2, text = "Create", command = self.checkRegistration)
+        b2.grid(row=4,column=2,columnspan=2, sticky=EW)
 
         win2.pack()
 
-    def cancel(self):
-        print("hi")
+    def exit(self):
+        self.win.destroy()
 
     def checkRegistration(self):
-        print("hi")
-
-
+        for item in self.entrys:
+            if item.get() == "":
+                messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
+                return
+        data = self.Connect()
+        cursor = data.cursor()
+        cursor.execute('SELECT Username,Email FROM Customer')
+        usernames = cursor.fetchall()
+        cursor.close()
+        data.close()
+        for name in usernames:
+            if self.user.get() == name[0]:
+                messagebox.showerror("Invalid Username", "The username already exists. Please try again with a unique username!")
+                return
+            if self.email.get() == name[1]:
+                messagebox.showerror("Invalid Email", "The email already exists. Please try again with a unique email!")
+                return
+        if findall("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",self.email.get()) == []:
+            messagebox.showerror("Invalid Email","This email is improperly formatted")
+            return
+        if self.pass1.get() != self.pass2.get():
+            messagebox.showerror("Passwords Do Not Match","Please make sure the passwords match!")
+            return
+        data = self.Connect()
+        cursor = data.cursor()
+        query = 'INSERT INTO Customer(Username,Password,Email)VALUES("{0}","{1}","{2}")'.format(self.user.get(),self.pass1.get(),self.email.get())
+        cursor.execute(query)
+        data.commit()
+        cursor.close()
+        data.close()
+        messagebox.showinfo("Welcome!", "Registration was sucessful!")
+        self.winregister.destroy()
+        self.win.deiconify()
+    
     def login(self):
         data = self.Connect()
         cursor = data.cursor()
