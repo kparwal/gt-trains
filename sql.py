@@ -319,7 +319,47 @@ class GTTrains:
         print("Meesa donta wanna do theesa code. meesa wanna be a jedi")
 
     def addInformation(self):
-        print("hi")
+        self.funcScreen.withdraw()
+        self.addInfo = Toplevel()
+        frame = Frame(self.addInfo)
+
+        self.schoolEmail = StringVar()
+
+        title = Label(frame, text = "Add School Info", fg="Blue",font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        schoolInfoLabel = Label(frame, text = "School Email Address")
+        schoolInfoLabel.grid(row=1,column=0, sticky=W)
+
+        schoolInfoText = Entry(frame, textvariable = self.schoolEmail)
+        schoolInfoText.grid(row=1,column=1, columnspan=2)
+
+        schoolReq = Label(frame, text = "Your school email address ends with .edu")
+        schoolReq.grid(row = 2, column = 0, columnspan = 2)
+
+        backEmail = Button(frame, text = "Back", command = self.back)
+        backEmail.grid(row=3,column=0, sticky=EW)
+
+        submitEmail = Button(frame, text = "Submit", command = self.addStudentInfo)
+        submitEmail.grid(row=3,column=1, sticky=EW)
+
+        frame.pack()
+
+    def addStudentInfo(self):
+        if(findall("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.edu$)",self.schoolEmail.get()) != []):
+            data = self.Connect()
+            cursor = data.cursor()
+            query = 'UPDATE Customer SET Is_Student = "1" WHERE Username ="{}"'.format(self.username.get())
+            cursor.execute(query)
+            data.commit()
+            cursor.close()
+            data.close()
+            self.addInfo.destroy()
+            self.funcScreen.deiconify()
+        else:
+            messagebox.showerror("Invalid Email", "Please enter a .edu email address")
+            return
+
 
     def cancel(self):
         print("hi")
@@ -339,6 +379,9 @@ class GTTrains:
         self.username.set("")
         self.password.set("")
         self.userstate = None
+
+    def back(self):
+        print("if only")
 
     def Connect(self):
         try:
