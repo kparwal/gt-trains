@@ -132,6 +132,7 @@ class GTTrains:
                 messagebox.showinfo("Login Successful!", "You are now logged in")
                 #self.win.withdraw()
                 #calls the functionality window with the user data
+                self.customerFunctionality()
             else:
                 messagebox.showerror("Invalid Password","Please check that the password is correct!")
         elif (userpass[1] != () and userpass[1] != None):
@@ -145,7 +146,8 @@ class GTTrains:
             messagebox.showerror("Invalid Username","Please Enter A Valid Username Or Try Registering")
 
     def customerFunctionality(self):
-        self.custfuncScreen = Toplevel()
+        self.win.withdraw()
+        self.funcScreen = Toplevel()
         frame = Frame(self.funcScreen)
 
         title = Label(frame, text = "Choose Functionality")
@@ -164,10 +166,10 @@ class GTTrains:
         cancel.grid(row = 4, column = 0)
 
         giveReview = Button(frame, text = "Give Review", command = self.giveReview)
-        giveReview.grid(row = 4, column = 0)
+        giveReview.grid(row = 5, column = 0)
 
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
-        addInfo.grid(row = 5, column = 0)
+        addInfo.grid(row = 6, column = 0)
 
         frame.pack()
 
