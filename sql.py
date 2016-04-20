@@ -158,7 +158,7 @@ class GTTrains:
         self.funcScreen = Toplevel()
         frame = Frame(self.funcScreen)
 
-        title = Label(frame, text = "Choose Functionality")
+        title = Label(frame, text = "Choose Functionality",fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row = 0, column = 0, columnspan = 2)
 
         viewTrain = Button(frame, text = "View Train Schedule", command = self.viewTrainSchedule)
@@ -179,6 +179,9 @@ class GTTrains:
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
         addInfo.grid(row = 6, column = 0)
 
+        logoutManager = Button(frame, text = "Logout", command = self.logout)
+        logoutManager.grid(row = 7, column = 0)
+
         frame.pack()
 
     def managerFunctionality(self):
@@ -186,7 +189,7 @@ class GTTrains:
         self.funcScreenManager = Toplevel()
         frame = Frame(self.funcScreenManager)
 
-        title = Label(frame, text = "Choose Functionality")
+        title = Label(frame, text = "Choose Functionality",fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row = 0, column = 0, columnspan = 2)
 
         viewTrain = Button(frame, text = "View revenue report", command = self.viewRevenueReport)
@@ -212,7 +215,7 @@ class GTTrains:
         self.chosenArrival = StringVar()
         self.departDate = StringVar()
 
-        title = Label(frame, text = "Search Trains")
+        title = Label(frame, text = "Search Trains", fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row = 0, column = 0, columnspan = 2)
 
         departFrom = Label(frame, text = "Departs from")
