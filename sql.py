@@ -353,7 +353,112 @@ class GTTrains:
         print("Dost thou arthen an illiterate lethrblaka farmer?")
 
     def cancelReservation(self):
-        print("hi")
+        self.cancelReservationID = StringVar()
+        self.funcScreen.withdraw()
+        self.cancelReservationWin = Toplevel()
+        frame = Frame(self.cancelReservationWin)
+
+        title = Label(frame, text = "Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 1, columnspan = 1)
+
+        reservationLabel = Label(frame, text = "Reservation ID")
+        reservationLabel.grid(row=1,column=0, sticky=W)
+
+        reservationIDEntry = Entry(frame, textvariable = self.cancelReservationID)
+        reservationIDEntry.grid(row=1, column=1)
+
+        searchButton = Button(frame, text="Search", command=self.cancelReservationSearch)
+        searchButton.grid(row=1, column=2)
+
+        frame.pack()
+
+    def cancelReservationSearch(self):
+        if True:
+            self.cancelReservationWin.withdraw()
+            self.cancelReservationWin2 = Toplevel()
+
+            self.cancelTotalCost = StringVar()
+            self.cancelDate = StringVar()
+            self.cancelRefund = StringVar()
+
+            frame = Frame(self.cancelReservationWin2)
+            trainsDict = {"2163 Express" : ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
+                        "2543 Regional" : ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
+                        }
+
+            title = Label(frame, text = "Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+            title.grid(row = 0, column = 3, columnspan = 2)
+
+            label = Label(frame, text = "Train \n (Train Number)")
+            label.grid(row = 1, column = 0)
+
+            label1 = Label(frame, text = "Time \n (Duration)")
+            label1.grid(row = 1, column = 1)
+
+            label2 = Label(frame, text = "Departs From")
+            label2.grid(row = 1, column = 2)
+
+            label3 = Label(frame, text = "Arrives At")
+            label3.grid(row = 1, column = 3)
+
+            label4 = Label(frame, text = "Class")
+            label4.grid(row = 1, column = 4)
+
+            label5 = Label(frame, text = "Price")
+            label5.grid(row = 1, column = 5)
+
+            label6 = Label(frame, text = "# of Baggages")
+            label6.grid(row = 1, column = 6)
+
+            label7 = Label(frame, text = "Passengar Name")
+            label7.grid(row = 1, column = 7)
+
+            rowCount = 2
+            colCount = 0
+
+            for key in trainsDict:
+                temp = Label(frame, text = key)
+                print(key)
+                temp.grid(row = rowCount, column = colCount)
+                colCount = colCount + 1
+                items = trainsDict.get(key)
+                for i in range(len(trainsDict.get(key))):
+                    print(items[i])
+                    temp1 = Label(frame, text = items[i])
+                    temp1.grid(row = rowCount, column = colCount)
+                    colCount = colCount + 1
+                colCount = 0
+                rowCount = rowCount + 1
+
+            label8 = Label(frame, text = "Total Cost of Reservation")
+            label8.grid(row=rowCount+1,column=0, sticky=W)
+
+            entry8 = Entry(frame, textvariable = self.cancelTotalCost)
+            entry8.grid(row=rowCount+1, column=1)
+
+            label9 = Label(frame, text = "Date of Cancellation")
+            label9.grid(row=rowCount+2,column=0, sticky=W)
+
+            entry9 = Entry(frame, textvariable = self.cancelDate)
+            entry9.grid(row=rowCount+2, column=1)
+
+            label10 = Label(frame, text = "Amount to be Refunded")
+            label10.grid(row=rowCount+3,column=0, sticky=W)
+
+            entry10 = Entry(frame, textvariable = self.cancelRefund)
+            entry10.grid(row=rowCount+3, column=1)
+
+            buttonBack = Button(frame, text = "Back", command = self.back)
+            buttonBack.grid(row = rowCount+4, column = 0, stick=EW)
+
+            submitCancelB = Button(frame, text = "Submit", command = None)
+            submitCancelB.grid(row= rowCount+4, column=1, sticky=EW)
+
+            frame.pack()
+
+        else:
+            messagebox.showerror("Error", "Enter the correct ReservationID")
+            return
 
     def giveReview(self):
         data = self.Connect()
