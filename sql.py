@@ -315,7 +315,28 @@ class GTTrains:
         frame.pack()
 
     def updateReservation(self):
-        print("hi")
+        self.funcScreen.withdraw()
+        self.reserveView = Toplevel()
+        frame = Frame(self.reserveView)
+
+        self.idNum = StringVar()
+
+        title = Label(frame, text= "Update Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=0, columnspan = 3)
+
+        idNum = Label(frame, text = "Reservation ID: ")
+        idNum.grid(row=1,column=0)
+
+        idNumEntry = Entry(frame, textvariable = self.idNum)
+        idNumEntry.grid(row=1, column=1)
+
+        searchButton = Button(frame, text="Search", command=self.setReservationUpdate)
+        searchButton.grid(row=1, column=2)
+
+        frame.pack()
+
+    def setReservationUpdate(self):
+        print("Dost thou arthen an illiterate lethrblaka farmer?")
 
     def cancelReservation(self):
         print("hi")
