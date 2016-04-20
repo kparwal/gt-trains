@@ -268,8 +268,51 @@ class GTTrains:
 
         frame.pack()
 
+
     def findTrains(self):
-        print("trololol")
+        self.searchTrains.withdraw()
+
+        self.trainsTable = Toplevel()
+        frame = Frame(self.trainsTable)
+
+        self.trainChosen = StringVar()
+
+        trainsDict = {"Hogwarts Express" : ["3:30 a.m.", "$220", "$100"],
+                        "Jon Snowmobile" : ["1:00 a.m.", "$100", "$10"],
+                        "Thomas the Tank" : ["12:00 p.m.", "$200", "$150"],
+                        "Dragon Wing" : ["2:00 p.m.", "FREE", "FREE"],
+                        }
+
+        label = Label(frame, text = "Train")
+        label.grid(row = 0, column = 0)
+
+        label1 = Label(frame, text = "Time")
+        label1.grid(row = 0, column = 1)
+
+        label2 = Label(frame, text = "1st Class Price")
+        label2.grid(row = 0, column = 2)
+
+        label3 = Label(frame, text = "2nd Class Price")
+        label3.grid(row = 0, column = 3)
+
+        rowCount = 1
+        colCount = 0
+
+        for key in trainsDict:
+            temp = Label(frame, text = key)
+            print(key)
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+            items = trainsDict.get(key)
+            for i in range(len(trainsDict.get(key))):
+                print(items[i])
+                temp1 = Label(frame, text = items[i])
+                temp1.grid(row = rowCount, column = colCount)
+                colCount = colCount + 1
+            colCount = 0
+            rowCount = rowCount + 1
+
+        frame.pack()
 
     def updateReservation(self):
         print("hi")
