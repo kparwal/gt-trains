@@ -104,6 +104,9 @@ class GTTrains:
         if findall("(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",self.email.get()) == []:
             messagebox.showerror("Invalid Email","This email is improperly formatted")
             return
+        if findall("((?=.*\d)(?=.*[A-Z]))",self.pass1.get()) == []:
+            messagebox.showerror("Invalid Password","The password must contain at least one number and at least one uppercase letter.")
+            return
         if self.pass1.get() != self.pass2.get():
             messagebox.showerror("Passwords Do Not Match","Please make sure the passwords match!")
             return
