@@ -61,10 +61,10 @@ class GTTrains:
 
         lb1 = Label(win2, text = "Email:")
         lb1.grid(row=1,column=0, sticky=W)
-        
+
         e0 = Entry(win2, textvariable = self.email)
         e0.grid(row=1,column=1, columnspan=4)
-        
+
         lb2 = Label(win2, text = "Password:")
         lb2.grid(row=2,column=0, sticky=W)
 
@@ -76,7 +76,7 @@ class GTTrains:
 
         e2 = Entry(win2, textvariable = self.pass2, show ="*")
         e2.grid(row=3,column=1, columnspan=4)
-        
+
         b2 = Button(win2, text = "Create", command = self.checkRegistration)
         b2.grid(row=4,column=2,columnspan=2, sticky=EW)
 
@@ -116,7 +116,7 @@ class GTTrains:
         messagebox.showinfo("Welcome!", "Registration was sucessful!")
         self.winregister.destroy()
         self.win.deiconify()
-    
+
     def login(self):
         userpass = [(),()]
         data = self.Connect()
@@ -144,6 +144,53 @@ class GTTrains:
         else:
             messagebox.showerror("Invalid Username","Please Enter A Valid Username Or Try Registering")
 
+def customerFunctionality(self):
+        self.custfuncScreen = Toplevel()
+        frame = Frame(self.funcScreen)
+
+        title = Label(frame, text = "Choose Functionality")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        viewTrain = Button(frame, text = "View Train Schedule", command = self.viewTrainSchedule)
+        viewTrain.grid(row = 1, column = 0)
+
+        makeNew = Button(frame, text = "Make a new Reservation", command = self.makeNewReservation)
+        makeNew.grid(row = 2, column = 0)
+
+        updateRes = Button(frame, text = "Update a Reservation", command = self.updateReservation)
+        updateRes.grid(row = 3, column = 0)
+
+        cancel = Button(frame, text = "Cancel a Reservation", command = self.cancelReservation)
+        cancel.grid(row = 4, column = 0)
+
+        giveReview = Button(frame, text = "Give Review", command = self.giveReview)
+        giveReview.grid(row = 4, column = 0)
+
+        addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
+        addInfo.grid(row = 5, column = 0)
+
+        frame.pack()
+
+    def viewTrainSchedule(self):
+        print("hi")
+
+    def makeNewReservation(self):
+        print("hi")
+
+    def updateReservation(self):
+        print("hi")
+
+    def cancelReservation(self):
+        print("hi")
+
+    def giveReview(self):
+        print("hi")
+
+    def addInformation(self):
+        print("hi")
+
+    def cancel(self):
+        print("hi")
 
     def Connect(self):
         try:
