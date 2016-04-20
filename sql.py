@@ -275,7 +275,7 @@ class GTTrains:
         self.trainsTable = Toplevel()
         frame = Frame(self.trainsTable)
 
-        self.trainChosen = StringVar()
+        self.trainChosen = IntVar()
 
         trainsDict = {"Hogwarts Express" : ["3:30 a.m.", "$220", "$100"],
                         "Jon Snowmobile" : ["1:00 a.m.", "$100", "$10"],
@@ -298,6 +298,8 @@ class GTTrains:
         rowCount = 1
         colCount = 0
 
+        classType = 0
+
         for key in trainsDict:
             temp = Label(frame, text = key)
             print(key)
@@ -305,14 +307,26 @@ class GTTrains:
             colCount = colCount + 1
             items = trainsDict.get(key)
             for i in range(len(trainsDict.get(key))):
-                print(items[i])
-                temp1 = Label(frame, text = items[i])
-                temp1.grid(row = rowCount, column = colCount)
+                if (colCount == 2 or colCount == 3):
+                    rb = Radiobutton(frame, text = items[i], variable = self.trainChosen, value = classType, command = self.test)
+                    rb.grid(row = rowCount, column = colCount)
+                    classType = classType + 1
+                else:
+                    temp1 = Label(frame, text = items[i])
+                    temp1.grid(row = rowCount, column = colCount)
                 colCount = colCount + 1
+
             colCount = 0
             rowCount = rowCount + 1
 
         frame.pack()
+
+    def test(self):
+        if (self.trainChosen.get() % 2 == 0):
+            print("First Class")
+        else:
+            print("Second Class")
+
 
     def updateReservation(self):
         self.funcScreen.withdraw()
