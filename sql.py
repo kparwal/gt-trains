@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import ttk
 from tkinter import messagebox
 import urllib.request
 import pymysql
@@ -178,9 +179,6 @@ class GTTrains:
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
         addInfo.grid(row = 6, column = 0)
 
-        logoutCustomer = Button(frame, text = "Logout", command = self.logout)
-        logoutCustomer.grid(row = 7, column = 0)
-
         frame.pack()
 
     def managerFunctionality(self):
@@ -206,7 +204,45 @@ class GTTrains:
         print("hi")
 
     def makeNewReservation(self):
-        print("hi")
+        self.funcScreen.withdraw()
+        self.searchTrains = Toplevel()
+        frame = Frame(self.searchTrains)
+
+        self.chosenDeparture = StringVar()
+        self.chosenArrival = StringVar()
+        self.departDate = StringVar()
+
+        title = Label(frame, text = "Search Trains")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        departFrom = Label(frame, text = "Departs from")
+        departFrom.grid(row = 1, column = 0)
+
+        departBox = ttk.Combobox(frame, textvariable = self.chosenDeparture)
+        departBox['values'] = ["Winterfell", "King's Landing", "Harrenhall"]
+        departBox.grid(row = 1, column = 1)
+
+        arrive = Label(frame, text = "Arrives at");
+        arrive.grid(row = 2, column = 0)
+
+        arriveBox = ttk.Combobox(frame, textvariable = self.chosenArrival)
+        arriveBox['values'] = ["Hogwarts", "Markarth", "Winterhold", "The Reach"]
+        arriveBox.grid(row = 2, column = 1)
+
+        date = Label(frame, text = "Departure Date")
+        date.grid(row = 3, column = 0)
+
+        dateBox = ttk.Combobox(frame, textvariable = self.departDate)
+        dateBox['values'] = ["7/16/1996"]
+        dateBox.grid(row = 3, column = 1)
+
+        findTrains = Button(frame, text = "Find Trains", command = self.findTrains)
+        findTrains.grid(row = 4, column = 0, sticky = E)
+
+        frame.pack()
+
+    def findTrains(self):
+        print("trololol")
 
     def updateReservation(self):
         print("hi")
@@ -235,9 +271,9 @@ class GTTrains:
         elif self.userstate == 1:
             self.funcScreenManager.destroy()
         self.win.deiconify()
-        self.username.set("") 
+        self.username.set("")
         self.password.set("")
-        self.userstate = None           
+        self.userstate = None
 
     def Connect(self):
         try:
