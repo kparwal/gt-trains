@@ -204,7 +204,31 @@ class GTTrains:
         frame.pack()
 
     def viewTrainSchedule(self):
-        print("hi")
+        self.funcScreen.withdraw()
+        self.trainView = Toplevel()
+        frame = Frame(self.trainView)
+
+        self.trainNumber = StringVar()
+
+        title = Label(frame, text= "View Train Schedule", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=0, columnspan = 2)
+
+        trainNum = Label(frame, text = "Train Number: ")
+        trainNum.grid(row=1,column=0, sticky=W)
+
+        trainNumEntry = Entry(frame, textvariable = self.trainNumber)
+        trainNumEntry.grid(row=1, column=1)
+
+        spaceLabel = Label(frame, text="")
+        spaceLabel.grid(row=2,column=0)
+
+        searchButton = Button(frame, text="Search", command=self.getTrainSchedule)
+        searchButton.grid(row=3, column=0, sticky=W)
+
+        frame.pack()
+
+    def getTrainSchedule(self):
+        print("From my point of view, the CS majors are evil!")
 
     def makeNewReservation(self):
         self.funcScreen.withdraw()
@@ -254,7 +278,45 @@ class GTTrains:
         print("hi")
 
     def giveReview(self):
-        print("hi")
+        data = self.Connect()
+        cursor = data.cursor()
+        self.funcScreen.withdraw()
+        self.reviewWin = Toplevel()
+        frame = Frame(self.reviewWin)
+
+        self.trainNumber = StringVar()
+        self.ratingVar = StringVar()
+        self.comment = StringVar()
+
+        title = Label(frame, text = "Give Review")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        trainNum = Label(frame, text = "Train Number: ")
+        trainNum.grid(row=1,column=0, sticky=W)
+
+        trainNumEntry = Entry(frame, textvariable = self.trainNumber)
+        trainNumEntry.grid(row=1, column=1)
+
+        ratingLabel = Label(frame, text = "Rating: ")
+        ratingLabel.grid(row=2, column=0, sticky=W)
+
+        ratingBox = ttk.Combobox(frame, textvariable=self.ratingVar)
+        ratingBox['values'] = ["Very Good" , "Good" , "Neutral" , "Bad" , "Very Bad"]
+        ratingBox.grid(row=2, column=1)
+
+        commentBox = Label(frame, text = "Comment: ")
+        commentBox.grid(row=3, column=0, sticky=W)
+
+        commentBoxEntry = Entry(frame, textvariable = self.comment)
+        commentBoxEntry.grid(row=3, column=1)
+
+        subReview = Button(frame, text = "Submit", command = self.submitReview)
+        subReview.grid(row = 4, column = 0, columnspan = 2)
+
+        frame.pack()
+
+    def submitReview(self):
+        print("Meesa donta wanna do theesa code. meesa wanna be a jedi")
 
     def addInformation(self):
         print("hi")
