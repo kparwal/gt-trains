@@ -17,6 +17,7 @@ class GTTrains:
         self.frame.pack(side=BOTTOM)
         self.username = StringVar()
         self.password = StringVar()
+        self.userstate = None
         #self.username.set("A")
         #self.password.set("A1")
         self.win.title("Login")
@@ -130,16 +131,19 @@ class GTTrains:
         if (userpass[0] != () and userpass[0] != None):
             if (self.password.get() == userpass[0][0]):
                 messagebox.showinfo("Login Successful!", "You are now logged in")
-                #self.win.withdraw()
+                self.win.withdraw()
                 #calls the functionality window with the user data
                 self.customerFunctionality()
+                self.userstate = 0
             else:
                 messagebox.showerror("Invalid Password","Please check that the password is correct!")
         elif (userpass[1] != () and userpass[1] != None):
             if (self.password.get() == userpass[1][0]):
                 messagebox.showinfo("Login Successful!", "You are now logged in as a manager")
-                #self.win.withdraw()
+                self.win.withdraw()
                 #calls the functionality window with the manager data
+                self.managerFunctionality()
+                self.userstate = 1
             else:
                 messagebox.showerror("Invalid Password","Please check that the password is correct!")
         else:
@@ -171,6 +175,28 @@ class GTTrains:
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
         addInfo.grid(row = 6, column = 0)
 
+        logoutCustomer = Button(frame, text = "Logout", command = self.logout)
+        logoutCustomer.grid(row = 7, column = 0)
+
+        frame.pack()
+
+    def managerFunctionality(self):
+        self.win.withdraw()
+        self.funcScreenManager = Toplevel()
+        frame = Frame(self.funcScreenManager)
+
+        title = Label(frame, text = "Choose Functionality")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        viewTrain = Button(frame, text = "View revenue report", command = self.viewRevenueReport)
+        viewTrain.grid(row = 1, column = 0)
+
+        makeNew = Button(frame, text = "View popular route report", command = self.viewPopularRouteReport)
+        makeNew.grid(row = 2, column = 0)
+
+        logoutManager = Button(frame, text = "Logout", command = self.logout)
+        logoutManager.grid(row = 3, column = 0)
+
         frame.pack()
 
     def viewTrainSchedule(self):
@@ -193,6 +219,22 @@ class GTTrains:
 
     def cancel(self):
         print("hi")
+
+    def viewRevenueReport(self):
+        print("hi")
+
+    def viewPopularRouteReport(self):
+        print("hi")
+
+    def logout(self):
+        if self.userstate == 0:
+            self.funcScreen.destroy()
+        elif self.userstate == 1:
+            self.funcScreenManager.destroy()
+        self.win.deiconify()
+        self.username.set("") 
+        self.password.set("")
+        self.userstate = None           
 
     def Connect(self):
         try:
