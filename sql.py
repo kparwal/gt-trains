@@ -418,6 +418,7 @@ class GTTrains:
             data.commit()
             cursor.close()
             data.close()
+            messagebox.showerror("Successful", "Successfully added student discount")
             self.addInfo.destroy()
             self.funcScreen.deiconify()
         else:
