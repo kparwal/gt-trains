@@ -144,7 +144,7 @@ class GTTrains:
         else:
             messagebox.showerror("Invalid Username","Please Enter A Valid Username Or Try Registering")
 
-def customerFunctionality(self):
+    def customerFunctionality(self):
         self.custfuncScreen = Toplevel()
         frame = Frame(self.funcScreen)
 
