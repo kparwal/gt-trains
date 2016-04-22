@@ -175,7 +175,7 @@ class GTTrains:
 
         giveReview = Button(frame, text = "Give Review", command = self.giveReview)
         giveReview.grid(row = 6, column = 0)
-        
+
         viewReview = Button(frame, text = "View Review", command = self.viewReview)
         viewReview.grid(row = 5, column = 0)
 
@@ -280,11 +280,11 @@ class GTTrains:
 
         self.trainChosen = IntVar()
 
-        trainsDict = {"Hogwarts Express" : ["3:30 a.m.", "$220", "$100"],
-                        "Jon Snowmobile" : ["1:00 a.m.", "$100", "$10"],
-                        "Thomas the Tank" : ["12:00 p.m.", "$200", "$150"],
-                        "Dragon Wing" : ["2:00 p.m.", "FREE", "FREE"],
-                        }
+        self.listofTrains = [["Hogwarts Express", "3:30 a.m.", "$220", "$100"],
+                        ["Jon Snowmobile", "1:00 a.m.", "$100", "$10"],
+                        ["Thomas the Tank", "12:00 p.m.", "$200", "$150"],
+                        ["Dragon Wing", "2:00 p.m.", "FREE", "FREE"],
+                        ]
 
         label = Label(frame, text = "Train")
         label.grid(row = 0, column = 0)
@@ -301,34 +301,59 @@ class GTTrains:
         rowCount = 1
         colCount = 0
 
-        classType = 0
+        self.classType = 0
 
-        for key in trainsDict:
-            temp = Label(frame, text = key)
-            print(key)
+        self.trainChoice = 0
+
+        for trainLists in self.listofTrains:
+            temp = Label(frame, text = trainLists[0])
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
-            items = trainsDict.get(key)
-            for i in range(len(trainsDict.get(key))):
-                if (colCount == 2 or colCount == 3):
-                    rb = Radiobutton(frame, text = items[i], variable = self.trainChosen, value = classType, command = self.test)
-                    rb.grid(row = rowCount, column = colCount)
-                    classType = classType + 1
-                else:
-                    temp1 = Label(frame, text = items[i])
-                    temp1.grid(row = rowCount, column = colCount)
-                colCount = colCount + 1
+
+            temp = Label(frame, text = trainLists[1])
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            rb = Radiobutton(frame, text = trainLists[2], variable = self.trainChosen, value = self.classType, command = self.test)
+            rb.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+            self.classType = self.classType + 1
+
+            rb = Radiobutton(frame, text = trainLists[3], variable = self.trainChosen, value = self.classType, command = self.test)
+            rb.grid(row = rowCount, column = colCount)
+            self.trainChoice = self.trainChoice + 1
+            self.classType = self.classType + 1
 
             colCount = 0
             rowCount = rowCount + 1
 
+        nextB = Button(frame, text = "Next", command = self.goToTravelExtras)
+        nextB.grid(row = rowCount + 1, column = 0, sticky = E)
+
+        backB = Button(frame, text = "Back")
+        backB.grid(row = rowCount + 1, column = 1, sticky = W)
+
         frame.pack()
 
     def test(self):
-        if (self.trainChosen.get() % 2 == 0):
-            print("First Class")
-        else:
-            print("Second Class")
+        print(self.listofTrains[self.trainChosen.get()])
+
+    def goToTravelExtras(self):
+        print("hi")
+
+    def goToConfirmation(self):
+        self.confirmScreen = Toplevel()
+        frame = Frame(self.confirmScreen)
+
+        title = Label(frame, text = "Confirmation")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        reLabel = Label(frame, text = "Reservaton ID")
+        reLabel = grid(row = 1, column = 0)
+
+        entry = Entry(frame, width = 50)
+        entry.grid(row = 1, column = 1)
+
 
 
     def updateReservation(self):
