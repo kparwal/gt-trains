@@ -560,7 +560,7 @@ class GTTrains:
         frame = Frame(self.viewReviewWin)
 
         title = Label(frame, text = "View Review", fg="Blue", font="TkDefaultFont 24 bold")
-        title.grid(row = 0, column = 1, columnspan = 1)
+        title.grid(row = 0, column = 0, columnspan = 2)
 
         reviewLabel = Label(frame, text = "Train Number")
         reviewLabel.grid(row=1,column=0, sticky=W)
@@ -568,16 +568,72 @@ class GTTrains:
         reviewEntry = Entry(frame, textvariable = self.trainName)
         reviewEntry.grid(row=1, column=1)
 
-        nextButton = Button(frame, text="Next", command=self.viewReviewSubmit)
-        nextButton.grid(row=2, column=1)
+        nextButton = Button(frame, text="Next", command=self.viewReviewNext)
+        nextButton.grid(row=2, column=1, sticky=EW)
 
         backB = Button(frame, text = "Back", command = self.back)
         backB.grid(row=2,column=0, sticky=EW)
 
         frame.pack()
 
-    def viewReviewSubmit(self):
-        return
+    def viewReviewNext(self):
+        ratingDict = {1:"Very Good",2:"Good",3:"Neutral",4:"Bad",5:"Very Bad"}
+        if(self.trainName.get() == ""):
+            messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
+            return
+        data = self.Connect()
+        cursor = data.cursor()
+        cursor.execute('SELECT Train_Number FROM Train_Name WHERE Name ="{}"'.format(self.trainName.get()))
+        trainNum = cursor.fetchone()
+        cursor.close()
+        data.close()
+        data = self.Connect()
+        cursor = data.cursor()
+        if(trainNum != () and trainNum != None):
+            cursor.execute('SELECT Comment,Rating FROM Review WHERE Train_Number ="{}" ORDER BY Rating ASC'.format(trainNum[0]))
+            reviews = cursor.fetchall()
+        else:
+            messagebox.showerror("Incorrect Train Name", "Please type the correct train name.")
+            return
+        cursor.close()
+        data.close()
+
+        reviewDict = []
+        for x in range(len(reviews)):
+            reviewDict.append([ratingDict.get(reviews[x][1]),reviews[x][0]])
+
+        self.viewReviewWin.destroy()
+        self.viewReviewWin2 = Toplevel()
+        frame = Frame(self.viewReviewWin2)
+
+        title = Label(frame, text = "View Review", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        label = Label(frame, text = "Rating", font="TkDefaultFont 16 bold")
+        label.grid(row = 1, column = 0, sticky=W)
+
+        label1 = Label(frame, text = "Comment", font="TkDefaultFont 16 bold")
+        label1.grid(row = 1, column = 1, sticky=W)
+
+        rowCount = 2
+        colCount = 0
+
+        for trainLists in reviewDict:
+            temp = Label(frame, text = trainLists[0])
+            temp.grid(row = rowCount, column = colCount, sticky=W)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = trainLists[1])
+            temp.grid(row = rowCount, column = colCount, sticky=W)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+        backB = Button(frame, text = "Back", command = self.back)
+        backB.grid(row=rowCount + 1,column=1, sticky=EW)
+
+        frame.pack()
 
     def addInformation(self):
         self.funcScreen.withdraw()
