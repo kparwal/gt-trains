@@ -464,8 +464,6 @@ class GTTrains:
             return
 
     def giveReview(self):
-        data = self.Connect()
-        cursor = data.cursor()
         self.funcScreen.withdraw()
         self.reviewWin = Toplevel()
         frame = Frame(self.reviewWin)
@@ -473,6 +471,8 @@ class GTTrains:
         self.trainNumber = StringVar()
         self.ratingVar = StringVar()
         self.comment = StringVar()
+
+        self.reviewEntry = [self.trainNumber, self.ratingVar, self.comment]
 
         title = Label(frame, text = "Give Review")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -500,12 +500,36 @@ class GTTrains:
         subReview.grid(row = 4, column = 0, columnspan = 2)
 
         frame.pack()
-    
+
+    def submitReview(self):
+        ratingDict = {"Very Good":"1","Good":"2","Neutral":"3","Bad":"4","Very Bad":"5"}
+        for item in self.reviewEntry:
+            if item.get() == "":
+                messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
+                return
+        data = self.Connect()
+        cursor = data.cursor()
+        cursor.execute('SELECT Train_Number FROM Train_Name WHERE Name ="{}"'.format(self.trainNumber.get()))
+        trainNum = cursor.fetchone()
+        cursor.close()
+        data.close()
+        data = self.Connect()
+        cursor = data.cursor()
+        if(trainNum != () and trainNum != None):
+            query = 'INSERT INTO Review(Comment,Rating,Train_Number,C_Username)VALUES("{0}","{1}","{2}","{3}")'.format(self.comment.get(),ratingDict.get(self.ratingVar.get()),trainNum[0],self.username.get())
+            cursor.execute(query)
+            data.commit()
+        else:
+            messagebox.showerror("Incorrect Train Name", "Please type the correct train name.")
+            return
+        cursor.close()
+        data.close()
+        messagebox.showerror("Review Submitted", "Thank you for submitting a review.")
+        self.reviewWin.destroy()
+        self.funcScreen.deiconify()
+
     def viewReview(self):
         return
-    
-    def submitReview(self):
-        print("Meesa donta wanna do theesa code. meesa wanna be a jedi")
 
     def addInformation(self):
         self.funcScreen.withdraw()
