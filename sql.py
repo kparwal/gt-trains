@@ -174,10 +174,10 @@ class GTTrains:
         cancel.grid(row = 4, column = 0)
 
         giveReview = Button(frame, text = "Give Review", command = self.giveReview)
-        giveReview.grid(row = 5, column = 0)
+        giveReview.grid(row = 6, column = 0)
         
         viewReview = Button(frame, text = "View Review", command = self.viewReview)
-        viewReview.grid(row = 6, column = 0)
+        viewReview.grid(row = 5, column = 0)
 
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
         addInfo.grid(row = 7, column = 0)
@@ -529,6 +529,29 @@ class GTTrains:
         self.funcScreen.deiconify()
 
     def viewReview(self):
+        self.trainName = StringVar()
+        self.funcScreen.withdraw()
+        self.viewReviewWin = Toplevel()
+        frame = Frame(self.viewReviewWin)
+
+        title = Label(frame, text = "View Review", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 1, columnspan = 1)
+
+        reviewLabel = Label(frame, text = "Train Number")
+        reviewLabel.grid(row=1,column=0, sticky=W)
+
+        reviewEntry = Entry(frame, textvariable = self.trainName)
+        reviewEntry.grid(row=1, column=1)
+
+        nextButton = Button(frame, text="Next", command=self.viewReviewSubmit)
+        nextButton.grid(row=2, column=1)
+
+        backB = Button(frame, text = "Back", command = self.back)
+        backB.grid(row=2,column=0, sticky=EW)
+
+        frame.pack()
+
+    def viewReviewSubmit(self):
         return
 
     def addInformation(self):
