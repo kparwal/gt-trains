@@ -231,7 +231,99 @@ class GTTrains:
         frame.pack()
 
     def getTrainSchedule(self):
-        print("From my point of view, the CS majors are evil!")
+        data = self.Connect()
+        cursor = data.cursor()
+
+       
+
+        nameQuery = "SELECT Train_Number FROM Train_Name WHERE Name = '{}'".format(self.trainNumber.get())
+        cursor.execute(nameQuery)
+        train = cursor.fetchone()
+
+        if train is not None or train == ():
+            train = train[0]
+        else:
+            messagebox.showerror("Incorrect Train Name", "Please type an existing Train name")
+            return
+        print(train)
+        query = "SELECT * FROM Train_Stop WHERE Train_Number = '{}' ORDER BY Arrival_Time ASC".format(train)
+        schedule = cursor.execute(query)
+        schedule = cursor.fetchall()
+        cursor.close()
+        data.close()
+        print(schedule)
+
+        self.trainView.withdraw()
+        self.scheduleView = Toplevel()
+        frame = Frame(self.scheduleView)
+        
+        dataSet = []
+        for index, row in enumerate(schedule):
+            rowlist = []
+            for idx, item in enumerate(row):
+                if item is None:
+                    item = ""
+                if idx == 0 and index == 0:
+                    rowlist.append(self.trainNumber.get())
+                elif idx == 0:
+                    rowlist.append("")
+                else:
+                    rowlist.append(item)
+            dataSet.append(rowlist)
+
+        print(dataSet)
+        trainsDict = {}
+        count = 0
+        for row in dataSet:
+            tableList = []
+            for col in row[1:]:
+                tableList.append(col)
+            trainsDict[self.trainNumber.get() + " "*count] = tableList
+            count += 1
+        
+
+        #trainsDict = {self.trainNumber.get() : [str(dataSet[0][2]), str(dataSet[0][3]), dataSet[0][1]]}
+
+        title = Label(frame, text = "View Train Schedule", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 0, columnspan = 3)
+
+        label = Label(frame, text = "Train \n (Train Number)")
+        label.grid(row = 1, column = 0)
+
+        label1 = Label(frame, text = "Station")
+        label1.grid(row = 1, column = 1)
+
+        label2 = Label(frame, text = "Arrival Time")
+        label2.grid(row = 1, column = 2)
+
+        label3 = Label(frame, text = "Departure Time")
+        label3.grid(row = 1, column = 3)
+
+        rowCount = 2
+        colCount = 0
+
+        #for key in trainsDict:
+        #    temp = Label(frame, text = key)
+        #    print(key)
+        #    temp.grid(row = rowCount, column = colCount)
+        #    colCount = colCount + 1
+        #    items = trainsDict.get(key)
+        #    for i in range(len(trainsDict.get(key))):
+        #        print(items[i])
+        #        temp1 = Label(frame, text = items[i])
+        #        temp1.grid(row = rowCount, column = colCount)
+        #        colCount = colCount + 1
+        #    colCount = 0
+        #    rowCount = rowCount + 1
+
+        for row in dataSet:
+            colCount = 0
+            for col in row:
+                temp = Label(frame, text = col)
+                temp.grid(row = rowCount, column = colCount)
+                colCount += 1
+            rowCount += 1
+        frame.pack()
 
     def makeNewReservation(self):
         self.funcScreen.withdraw()
