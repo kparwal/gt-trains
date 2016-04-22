@@ -234,7 +234,7 @@ class GTTrains:
         data = self.Connect()
         cursor = data.cursor()
 
-       
+
 
         nameQuery = "SELECT Train_Number FROM Train_Name WHERE Name = '{}'".format(self.trainNumber.get())
         cursor.execute(nameQuery)
@@ -256,7 +256,7 @@ class GTTrains:
         self.trainView.withdraw()
         self.scheduleView = Toplevel()
         frame = Frame(self.scheduleView)
-        
+
         dataSet = []
         for index, row in enumerate(schedule):
             rowlist = []
@@ -280,7 +280,7 @@ class GTTrains:
                 tableList.append(col)
             trainsDict[self.trainNumber.get() + " "*count] = tableList
             count += 1
-        
+
 
         #trainsDict = {self.trainNumber.get() : [str(dataSet[0][2]), str(dataSet[0][3]), dataSet[0][1]]}
 
@@ -393,9 +393,7 @@ class GTTrains:
         rowCount = 1
         colCount = 0
 
-        self.classType = 0
-
-        self.trainChoice = 0
+        rowCol = 0
 
         for trainLists in self.listofTrains:
             temp = Label(frame, text = trainLists[0])
@@ -406,15 +404,15 @@ class GTTrains:
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
-            rb = Radiobutton(frame, text = trainLists[2], variable = self.trainChosen, value = self.classType, command = self.test)
+            rb = Radiobutton(frame, text = trainLists[2], variable = self.trainChosen, value = rowCol)
             rb.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
-            self.classType = self.classType + 1
+            rowCol = rowCol + 1
 
-            rb = Radiobutton(frame, text = trainLists[3], variable = self.trainChosen, value = self.classType, command = self.test)
+            rb = Radiobutton(frame, text = trainLists[3], variable = self.trainChosen, value = rowCol)
             rb.grid(row = rowCount, column = colCount)
-            self.trainChoice = self.trainChoice + 1
-            self.classType = self.classType + 1
+
+            rowCol = rowCol + 9
 
             colCount = 0
             rowCount = rowCount + 1
@@ -427,12 +425,42 @@ class GTTrains:
 
         frame.pack()
 
-    def test(self):
-        print(self.listofTrains[self.trainChosen.get()])
+    def getTrainChosen(self):
+        train = self.trainChosen.get()
+
+        trainIndex = train // 10
+        indicator = train % 10
+
+        finalChoice = [self.listofTrains[trainIndex][0]]
+
+        classChosen = ""
+
+        if (indicator == 0):
+            classChosen = "First Class"
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][2]]
+        elif (indicator == 1) :
+            classChosen = "Second Class"
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][3]]
+        else:
+            print("You done fucked")
+
+        return(finalChoice)
+
 
     def goToTravelExtras(self):
-        print("hi")
+        trainChoice = self.getTrainChosen()
+        self.trainsTable.withdraw()
 
+        self.travelInfo = Toplevel()
+        frame = Frame(self.travelInfo)
+
+        title = Label(frame, text = "Travel Extras and Passenger Info")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        numBagLabel = Label(frame, text = "Number of baggage")
+        numBagLabel.grid(row = 1, column = 0)
+
+        print(trainChoice)
     def goToConfirmation(self):
         self.confirmScreen = Toplevel()
         frame = Frame(self.confirmScreen)
