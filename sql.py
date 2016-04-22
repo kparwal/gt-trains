@@ -175,12 +175,15 @@ class GTTrains:
 
         giveReview = Button(frame, text = "Give Review", command = self.giveReview)
         giveReview.grid(row = 5, column = 0)
+        
+        viewReview = Button(frame, text = "View Review", command = self.viewReview)
+        viewReview.grid(row = 6, column = 0)
 
         addInfo = Button(frame, text = "Add School Information (student discount)", command = self.addInformation)
-        addInfo.grid(row = 6, column = 0)
+        addInfo.grid(row = 7, column = 0)
 
         logoutManager = Button(frame, text = "Logout", command = self.logout)
-        logoutManager.grid(row = 7, column = 0)
+        logoutManager.grid(row = 8, column = 0)
 
         frame.pack()
 
@@ -497,7 +500,10 @@ class GTTrains:
         subReview.grid(row = 4, column = 0, columnspan = 2)
 
         frame.pack()
-
+    
+    def viewReview(self):
+        return
+    
     def submitReview(self):
         print("Meesa donta wanna do theesa code. meesa wanna be a jedi")
 
