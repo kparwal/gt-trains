@@ -608,8 +608,8 @@ class GTTrains:
 
     def makeReservation(self):
         cost = IntVar()
-        cost.set(99)
-
+        # cost.set(99)
+        cost.set(self.calcCost())
         self.cardChosen = StringVar()
 
         try:
@@ -759,8 +759,8 @@ class GTTrains:
         cost = 0
 
         for items in self.fullTrainList:
-            if (items[7] > 2):
-                cost = cost + (30 * (items[7] - 2))
+            if (items[8] > 2):
+                cost = cost + (30 * (items[8] - 2))
             cost = cost + items[5]
 
 
@@ -775,7 +775,7 @@ class GTTrains:
 
         finalCost = self.calcCost()
 
-        sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}')".format(0, self.username.get(), "123", finalCost)
+        sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')".format(0, self.username.get(), "123", finalCost)
         cursor.execute(sql)
         data.commit()
 
@@ -790,23 +790,25 @@ class GTTrains:
         for lists in self.fullTrainList:
             fetchNumber = "SELECT `Train_Number` from `Train_Name` WHERE `Name` = '{}'".format(lists[0])
             cursor.execute(fetchNumber)
-            num = cursor.fetch()[0][0]
-
-            insert = "INSERT INTO `Reserve_Train` (`Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}'".format(aList, self.username.get(), lists[6], str(lists[3]), self.fullTrainList[8], lists[1], lists[2], num)
-            cursor.execute()
+            num = cursor.fetchall()[0][0]
+            print('list')
+            print(lists)
+            insert = "INSERT INTO `Reserve_Train` (`ReservationID`, `Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`, `Num_Baggage`) VALUES ('{}'," \
+                     "'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')".format(aList, self.username.get(), lists[-2], str(lists[3]), lists[6], lists[1], lists[2], num, lists[-1])
+            cursor.execute(insert)
             data.commit()
 
         cursor.close()
         data.close()
 
-        aList = aList[0][0]
+        # aList = aList[0][0]
 
         num = IntVar()
 
         title = Label(frame, text = "Confirmation")
         title.grid(row = 0, column = 0, columnspan = 2)
 
-        reLabel = Label(frame, text = "Reservaton ID")
+        reLabel = Label(frame, text = "Reservation ID")
         reLabel.grid(row = 1, column = 0)
 
         entry = Entry(frame, width = 50, textvariable = num)
@@ -905,7 +907,7 @@ class GTTrains:
             label6 = Label(frame, text="# of Baggages")
             label6.grid(row=1, column=6)
 
-            label7 = Label(frame, text="Passengar Name")
+            label7 = Label(frame, text="Passenger Name")
             label7.grid(row=1, column=7)
 
             rowCount = 2

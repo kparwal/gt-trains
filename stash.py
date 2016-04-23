@@ -5,7 +5,6 @@ import urllib.request
 import pymysql
 from re import findall
 import datetime
-import random
 
 
 class GTTrains:
@@ -160,8 +159,6 @@ class GTTrains:
             messagebox.showerror("Invalid Username", "Please Enter A Valid Username Or Try Registering")
 
     def customerFunctionality(self):
-        self.fullTrainList = [] # will track a single customer's full train list. Reset at this point since coming back to this screen indicates "new"
-
         self.win.withdraw()
         self.funcScreen = Toplevel()
         frame = Frame(self.funcScreen)
@@ -346,11 +343,7 @@ class GTTrains:
             return deep_list
 
     def makeNewReservation(self):
-        try:
-            self.funcScreen.withdraw()
-        except:
-            print("WHAT DO YOU MEAN WHEN YOU NOD YOUR HEAD YES")
-
+        self.funcScreen.withdraw()
         self.searchTrains = Toplevel()
         frame = Frame(self.searchTrains)
         data = self.Connect()
@@ -381,10 +374,11 @@ class GTTrains:
         arriveBox['values'] = location_list
         arriveBox.grid(row=2, column=1)
 
-        date = Label(frame, text = "Departure Date(YYYY-MM-DD)")
-        date.grid(row = 3, column = 0)
+        date = Label(frame, text="Departure Date")
+        date.grid(row=3, column=0)
 
-        dateBox = Entry(frame, textvariable=self.departDate)
+        dateBox = ttk.Combobox(frame, textvariable=self.departDate)
+        dateBox['values'] = ["7/16/1996"]
         dateBox.grid(row=3, column=1)
 
         findTrains = Button(frame, text="Find Trains", command=self.findTrains)
@@ -392,22 +386,8 @@ class GTTrains:
 
         frame.pack()
 
-    def parseDate(self):
-        userDate = self.departDate.get()
-        userDate = userDate.split('-')
-
-        userDate = datetime.datetime(int(userDate[0]), int(userDate[1]), int(userDate[2]))
-
-        return(userDate)
-
 
     def findTrains(self):
-        userDate = self.parseDate()
-
-        if (userDate < datetime.datetime.today()):
-        #    self.makeNewReservation()
-            return()
-
         self.searchTrains.withdraw()
 
         self.trainsTable = Toplevel()
@@ -420,7 +400,6 @@ class GTTrains:
                              ["Thomas the Tank", "12:00 p.m.", "$200", "$150"],
                              ["Dragon Wing", "2:00 p.m.", "FREE", "FREE"],
         ]
-
         data = self.Connect()
         cursor = data.cursor()
         query = """
@@ -433,7 +412,7 @@ class GTTrains:
                 SELECT *
                 FROM `Train_Stop`
                 NATURAL JOIN `Station`
-                WHERE `Location` = '{}'
+                WHERE `Location` = 'Westeros'
                 AND `Departure_Time` IS NOT NULL
                 ORDER BY `Location` ASC
                 ) AS A
@@ -441,23 +420,19 @@ class GTTrains:
                 SELECT *
                 FROM `Train_Stop`
                 NATURAL JOIN `Station`
-                WHERE `Location` = '{}'
+                WHERE `Location` = 'New York'
                 AND `Arrival_Time` IS NOT NULL
                 ORDER BY `Location` ASC
                 ) AS B ON `A`.`Train_Number` = `B`.`Train_Number`) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
                 AS E INNER JOIN `Train_Route` AS F ON `E`.`Train_Number`=`F`.`Train_Number`
-                """.format(self.chosenDeparture.get(), self.chosenArrival.get())
+                """
         cursor.execute(query)
         datalist = self.nested_tuple_to_list(cursor.fetchall(), False)
         # datalist = cursor.fetchall()
         cursor.close()
         data.close()
 
-        if (len(datalist) == 0):
-          #  self.makeNewReservation()
-            return()
-
-      #  print(datalist)
+        print(datalist)
         self.listofTrains = datalist
 
         label = Label(frame, text="Train")
@@ -531,39 +506,33 @@ class GTTrains:
     def getTrainChosen(self):
         train = self.trainChosen.get()
 
-        self.classChosen = ""
-
         trainIndex = train // 10
         indicator = train % 10
 
-        self.fullTrainList = self.fullTrainList + [self.listofTrains[trainIndex]]
-        print(self.fullTrainList)
+        finalChoice = [self.listofTrains[trainIndex][0]]
+
+        classChosen = ""
 
         if (indicator == 0):
-            del self.fullTrainList[len(self.fullTrainList) - 1][6]
-            self.classChosen = "First"
-
-            self.fullTrainList[len(self.fullTrainList) - 1].append(self.classChosen)
+            classChosen = "First Class"
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][5]]
         elif (indicator == 1):
-            del self.fullTrainList[len(self.fullTrainList) - 1][5]
-            self.classChosen = "Second"
+            classChosen = "Second Class"
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][6]]
+        else:
+            print("You done fucked")
 
-            self.fullTrainList[len(self.fullTrainList) - 1].append(self.classChosen)
-
-        print(self.fullTrainList)
-
-        print(self.fullTrainList)
+        return (finalChoice)
 
 
     def goToTravelExtras(self):
-        self.getTrainChosen()
+        trainChoice = self.getTrainChosen()
         self.trainsTable.withdraw()
 
         self.travelInfo = Toplevel()
         frame = Frame(self.travelInfo)
 
-        self.baggageNum = IntVar()
-        self.passengerName = StringVar()
+        baggageNum = IntVar()
 
         title = Label(frame, text = "Travel Extras & Passenger Info", fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -574,7 +543,7 @@ class GTTrains:
         numBagLabel = Label(frame, text = "Number of Baggage", font="TkDefaultFont 13")
         numBagLabel.grid(row = 2, column = 0)
 
-        bagEntryBox = Spinbox(frame, from_= 0, to = 4, increment = 1, textvariable = self.baggageNum, state='readonly', font="TkDefaultFont 13")
+        bagEntryBox = Spinbox(frame, from_= 0, to=4, increment=1, textvariable=baggageNum, state='readonly', font="TkDefaultFont 13")
         bagEntryBox.grid(row = 2, column =1)
 
         bagInfo = Label(frame, text = "Every passenger can bring up to 4 baggage, 2 free of charge, 2 for $30 per bag")
@@ -586,222 +555,29 @@ class GTTrains:
         passNameLabel = Label(frame, text= "Passenger Name", font="TkDefaultFont 13")
         passNameLabel.grid(row=5, column=0)
 
-        passName = Entry(frame, textvariable = self.passengerName)
+        passName = Entry(frame)
         passName.grid(row=5, column=1)
 
         spaceLabel3 = Label(frame)
         spaceLabel3.grid(row=6, column=0, columnspan=2)
 
-        nextB = Button(frame, text = "Next", command = self.updateFullList)
+        nextB = Button(frame, text = "Next", command = self.goToConfirmation)
         nextB.grid(row =7 , column = 1)
 
         backB = Button(frame, text = "Back")
         backB.grid(row = 7, column = 0)
 
-        frame.pack()
 
-
-    def updateFullList(self):
-        self.fullTrainList[len(self.fullTrainList) - 1] = self.fullTrainList[len(self.fullTrainList) - 1] + [self.passengerName.get(), self.baggageNum.get()]
-        print(self.fullTrainList)
-        self.makeReservation()
-
-    def makeReservation(self):
-        cost = IntVar()
-        cost.set(99)
-
-        self.cardChosen = StringVar()
-
-        try:
-            self.travelInfo.withdraw()
-        except:
-            print("Error")
-
-        self.make1 = Toplevel()
-        frame = Frame(self.make1)
-
-        title = Label(frame, text = "Make Reservation")
-        title.grid(row = 0, column = 0, columnspan = 2)
-
-        discountLabel = Label(frame, text = "Discount or nah")
-        discountLabel.grid(row = 1, column = 0, sticky = EW)
-
-        cLabel = Label(frame, text = "Total cost")
-        cLabel.grid(row = 2, column = 0)
-
-        cEntry = Entry(frame, width = 30, textvariable = cost)
-        cEntry.grid(row = 2, column = 1)
-
-        cardLabel = Label(frame, text = "Use Card")
-        cardLabel.grid(row = 3, column = 0)
-
-        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen)
-        cardBox['values'] = ["123", "456", "789"]
-        cardBox.grid(row = 3, column = 1)
-
-        addCardButton = Button(frame, text = "Add a card", command = self.addCardScreen)
-        addCardButton.grid(row = 3, column = 2)
-
-        cont = Button(frame, text = "Continue adding trains", command = self.addMore)
-        cont.grid(row = 4, column = 0)
-
-        back = Button(frame, text = "Back")
-        back.grid(row = 5, column = 0)
-
-        next = Button(frame, text = "Submit", command = self.goToConfirmation)
-        next.grid(row = 5, column = 1)
-
-        currLabel = Label(frame, text = "Currently Selected")
-        currLabel.grid(row = 6, column = 0, columnspan = 2, sticky = W)
-
-        label1 = Label(frame, text = "Train")
-        label1.grid(row = 7, column = 0)
-
-        label2 = Label(frame, text = "Time (Duration)")
-        label2.grid(row = 7, column = 1)
-
-        label3 = Label(frame, text = "Departs from")
-        label3.grid(row = 7, column = 2)
-
-        label4 = Label(frame, text = "Arrives at")
-        label4.grid(row = 7, column = 3)
-
-        label5 = Label(frame, text = "Class")
-        label5.grid(row = 7, column = 4)
-
-        label6 = Label(frame, text = "Price")
-        label6.grid(row = 7, column = 5)
-
-        label7 = Label(frame, text = "Number of baggages")
-        label7.grid(row = 7, column = 6)
-
-        label8 = Label(frame, text = "Passenger Name")
-        label8.grid(row = 7, column = 7)
-
-        label9 = Label(frame, text = "Remove")
-        label9.grid(row = 7, column = 8)
-
-
-        rowCount = 8
-        colCount = 0
-
-        self.removeTracker = IntVar()
-        removeIndex = 0
-
-        for indi in self.fullTrainList:
-            temp = Radiobutton(frame, text = indi[0], variable = self.removeTracker, value = removeIndex)
-            temp.grid(row = rowCount, column = colCount)    # col 0 has the train name
-            colCount = colCount + 1
-            removeIndex = removeIndex + 1
-
-            start = indi[3]
-            end = indi[4]
-            duration = end - start
-
-            hours = duration.total_seconds() // 3600
-            minutes = (duration.total_seconds() - (hours * 3600)) // 60
-            seconds = duration.total_seconds() - (hours * 3600) - (minutes * 60)
-            strDuration = str(hours) + " hours " + str(minutes) + "minutes " + str(seconds) + "seconds"
-
-            temp = Label(frame, text = strDuration) # col 1 has the duration
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = indi[1]) # col 2 has the departure station
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = indi[2]) # col 3 has the arrival station
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = self.classChosen) # col 4 has the class type
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = indi[5]) # col 5 has the price
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = indi[7]) # col 6 has baggage num
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Label(frame, text = indi[6]) # col 7 has the name
-            temp.grid(row = rowCount, column = colCount)
-            colCount = colCount + 1
-
-            temp = Button(frame, text = "Remove", command = self.removeTrain)
-            temp.grid(row = rowCount, column = colCount)
-
-            colCount = 0
-            rowCount = rowCount + 1
-
-            print(indi)
 
         frame.pack()
 
-    def removeTrain(self):
-        self.make1.withdraw()
-        removeIndex = self.removeTracker.get()
-
-        del self.fullTrainList[removeIndex]
-        self.makeReservation()
-
-    def addMore(self):
-        self.make1.withdraw()
-        self.makeNewReservation()
-
-    def addCardScreen(self):
-        pass
-
-    def calcCost(self):
-        cost = 0
-
-        for items in self.fullTrainList:
-            if (int(items[9]) > 2):
-                cost = cost + (30 * (int(items[8]) - 2))
-            cost = cost + int(items[5])
-
-
-        return(cost)
+        #print(trainChoice)
 
     def goToConfirmation(self):
-        self.make1.withdraw()
-
-        data = self.Connect()
-
-        cursor = data.cursor()
-
-        finalCost = self.calcCost()
-
-        sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}')".format(0, self.username.get(), "123", finalCost)
-        cursor.execute(sql)
-        data.commit()
 
         self.travelInfo.withdraw()
         self.confirmScreen = Toplevel()
         frame = Frame(self.confirmScreen)
-
-        sql = "SELECT MAX(`ReservationID`) FROM `Reservation`"
-        cursor.execute(sql)
-        aList = cursor.fetchall()[0][0]
-
-        for lists in self.fullTrainList:
-            fetchNumber = "SELECT `Train_Number` from `Train_Name` WHERE `Name` = '{}'".format(lists[0])
-            cursor.execute(fetchNumber)
-            num = cursor.fetch()[0][0]
-
-            insert = "INSERT INTO `Reserve_Train` (`Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}'".format(aList, self.username.get(), lists[6], str(lists[3]), self.fullTrainList[8], lists[1], lists[2], num)
-            cursor.execute()
-            data.commit()
-
-        cursor.close()
-        data.close()
-
-        aList = aList[0][0]
-
-        num = IntVar()
 
         title = Label(frame, text = "Confirmation")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -809,16 +585,9 @@ class GTTrains:
         reLabel = Label(frame, text = "Reservaton ID")
         reLabel.grid(row = 1, column = 0)
 
-        entry = Entry(frame, width = 50, textvariable = num)
+        entry = Entry(frame, width = 50)
         entry.grid(row = 1, column = 1)
-        isValid = False
 
-        while (not isValid):
-            randId = random.randrange(1000, 9999)
-            #check that ID is unique
-            isValid = True
-
-        num.set(randId)
         frame.pack()
 
 
@@ -867,20 +636,45 @@ class GTTrains:
         frame.pack()
 
     def cancelReservationSearch(self):
-        if True:
+        query = "SELECT * FROM `Reservation` WHERE `ReservationID`={}".format(self.cancelRservationID)
+        data = self.Connect()
+        cursor = data.cursor()
+        cursor.execute(query)
+        datalist = self.nested_tuple_to_list(cursor.fetchall())
+        cursor.close()
+        data.close()
+        if datalist:
+            if datalist[2] != self.username:
+                print("This is not your reservation!")
+                return
+            if datalist[1] == 1:
+                print("This reservation has already been cancelled!")
+                return
             self.cancelReservationWin.withdraw()
             self.cancelReservationWin2 = Toplevel()
 
             self.cancelTotalCost = StringVar()
             self.cancelDate = StringVar()
             self.cancelRefund = StringVar()
-
+            query = """SELECT *
+            FROM (
+            SELECT *
+            FROM `Reserve_Train` INNER JOIN `Train_Route` ON `Reserve_Train`.`Train_Number`=`Train_Route`.`Train_Number`
+            WHERE `ReservationID`={}) AS A INNER JOIN `Train_Stop` AS B ON `A`.`Train_Number`=`B`.`Train_Number` AND `A`.`Departs_From`=`B`.`Station_Name`""".format(self.cancelReservationID)
+            data = self.Connect()
+            cursor = data.cursor()
+            cursor.execute(query)
+            ticketlist = self.nested_tuple_to_list(cursor.fetchall(), False)
+            cursor.close()
+            data.close()
             frame = Frame(self.cancelReservationWin2)
             trainsDict = {
                 "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
                 "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
             }
-
+            trainsDict = {}
+            for x in ticketlist:
+                trainsDict[x[0]] = x[1:]
             title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
             title.grid(row=0, column=3, columnspan=2)
 
@@ -902,10 +696,10 @@ class GTTrains:
             label5 = Label(frame, text="Price")
             label5.grid(row=1, column=5)
 
-            label6 = Label(frame, text="# of Baggages")
+            label6 = Label(frame, text="# of Baggage items")
             label6.grid(row=1, column=6)
 
-            label7 = Label(frame, text="Passengar Name")
+            label7 = Label(frame, text="Passenger Name")
             label7.grid(row=1, column=7)
 
             rowCount = 2
