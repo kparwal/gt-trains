@@ -5,6 +5,7 @@ import urllib.request
 import pymysql
 from re import findall
 import datetime
+import random
 
 
 class GTTrains:
@@ -626,7 +627,7 @@ class GTTrains:
         back = Button(frame, text = "Back")
         back.grid(row = 5, column = 0)
 
-        next = Button(frame, text = "Next")
+        next = Button(frame, text = "Next", command = self.goToConfirmation)
         next.grid(row = 5, column = 1)
 
         currLabel = Label(frame, text = "Currently Selected")
@@ -739,6 +740,8 @@ class GTTrains:
         self.travelInfo.withdraw()
         self.confirmScreen = Toplevel()
         frame = Frame(self.confirmScreen)
+
+        num = IntVar()
 
         title = Label(frame, text = "Confirmation")
         title.grid(row = 0, column = 0, columnspan = 2)
