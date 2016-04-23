@@ -20,7 +20,7 @@ class GTTrains:
         self.password = StringVar()
         self.userstate = None
         # self.username.set("A")
-        #self.password.set("A1")
+        # self.password.set("A1")
         self.win.title("Login")
 
         lb0 = Label(self.frame, text="Username:")
@@ -303,7 +303,7 @@ class GTTrains:
         rowCount = 2
         colCount = 0
 
-        #for key in trainsDict:
+        # for key in trainsDict:
         #    temp = Label(frame, text = key)
         #    print(key)
         #    temp.grid(row = rowCount, column = colCount)
@@ -326,12 +326,21 @@ class GTTrains:
             rowCount += 1
         frame.pack()
 
-    def nested_tuple_to_list(self, tuple_struct):
-        flat_list = []
-        for i in tuple_struct:
-            for j in i:
-                flat_list.append(j)
-        return flat_list
+    def nested_tuple_to_list(self, tuple_struct, flat=True):
+        if flat:
+            flat_list = []
+            for i in tuple_struct:
+                for j in i:
+                    flat_list.append(j)
+            return flat_list
+        else:
+            deep_list = []
+            for i in tuple_struct:
+                inlist = []
+                for j in i:
+                    inlist.append(j)
+                deep_list.append(inlist)
+            return deep_list
 
     def makeNewReservation(self):
         self.funcScreen.withdraw()
@@ -339,7 +348,7 @@ class GTTrains:
         frame = Frame(self.searchTrains)
         data = self.Connect()
         cursor = data.cursor()
-        nameQuery = "SELECT Location FROM Station"
+        nameQuery = "SELECT DISTINCT Location FROM Station"
         cursor.execute(nameQuery)
         location_list = self.nested_tuple_to_list(cursor.fetchall())
         cursor.close()
@@ -391,18 +400,61 @@ class GTTrains:
                              ["Thomas the Tank", "12:00 p.m.", "$200", "$150"],
                              ["Dragon Wing", "2:00 p.m.", "FREE", "FREE"],
         ]
+        data = self.Connect()
+        cursor = data.cursor()
+        query = """
+                SELECT `Name`, `Depart From`, `Arrive At`, `Departure_Time`, `Arrival_Time`, `First_Class_Price`, `Second_Class_Price`
+                FROM
+                (SELECT `Name`, `Depart From`, `Arrive At`, `Departure_Time`, `Arrival_Time`, `C`.`Train_Number`
+                FROM
+                (SELECT `A`.`Station_Name` AS `Depart From` , `B`.`Station_Name` AS `Arrive At` , `A`.`Train_Number` , `A`.`Departure_Time` , `B`.`Arrival_Time`
+                FROM (
+                SELECT *
+                FROM `Train_Stop`
+                NATURAL JOIN `Station`
+                WHERE `Location` = 'Westeros'
+                AND `Departure_Time` IS NOT NULL
+                ORDER BY `Location` ASC
+                ) AS A
+                INNER JOIN (
+                SELECT *
+                FROM `Train_Stop`
+                NATURAL JOIN `Station`
+                WHERE `Location` = 'New York'
+                AND `Arrival_Time` IS NOT NULL
+                ORDER BY `Location` ASC
+                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number`) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
+                AS E INNER JOIN `Train_Route` AS F ON `E`.`Train_Number`=`F`.`Train_Number`
+                """
+        cursor.execute(query)
+        datalist = self.nested_tuple_to_list(cursor.fetchall(), False)
+        # datalist = cursor.fetchall()
+        cursor.close()
+        data.close()
+
+        print(datalist)
+        self.listofTrains = datalist
 
         label = Label(frame, text="Train")
         label.grid(row=0, column=0)
 
-        label1 = Label(frame, text="Time")
+        label1 = Label(frame, text="Leaves From")
         label1.grid(row=0, column=1)
 
-        label2 = Label(frame, text="1st Class Price")
+        label2 = Label(frame, text="Arrives At")
         label2.grid(row=0, column=2)
 
-        label3 = Label(frame, text="2nd Class Price")
+        label3 = Label(frame, text="Departure Time")
         label3.grid(row=0, column=3)
+
+        label4 = Label(frame, text="Arrival Time")
+        label4.grid(row=0, column=4)
+
+        label5 = Label(frame, text="1st Class Price")
+        label5.grid(row=0, column=5)
+
+        label6 = Label(frame, text="2nd Class Price")
+        label6.grid(row=0, column=6)
 
         rowCount = 1
         colCount = 0
@@ -418,12 +470,24 @@ class GTTrains:
             temp.grid(row=rowCount, column=colCount)
             colCount = colCount + 1
 
-            rb = Radiobutton(frame, text=trainLists[2], variable=self.trainChosen, value=rowCol)
+            temp = Label(frame, text=trainLists[2])
+            temp.grid(row=rowCount, column=colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text=trainLists[3])
+            temp.grid(row=rowCount, column=colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text=trainLists[4])
+            temp.grid(row=rowCount, column=colCount)
+            colCount = colCount + 1
+
+            rb = Radiobutton(frame, text=trainLists[5], variable=self.trainChosen, value=rowCol)
             rb.grid(row=rowCount, column=colCount)
             colCount = colCount + 1
             rowCol = rowCol + 1
 
-            rb = Radiobutton(frame, text=trainLists[3], variable=self.trainChosen, value=rowCol)
+            rb = Radiobutton(frame, text=trainLists[6], variable=self.trainChosen, value=rowCol)
             rb.grid(row=rowCount, column=colCount)
 
             rowCol = rowCol + 9
@@ -451,10 +515,10 @@ class GTTrains:
 
         if (indicator == 0):
             classChosen = "First Class"
-            finalChoice = finalChoice + [self.listofTrains[trainIndex][2]]
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][5]]
         elif (indicator == 1):
             classChosen = "Second Class"
-            finalChoice = finalChoice + [self.listofTrains[trainIndex][3]]
+            finalChoice = finalChoice + [self.listofTrains[trainIndex][6]]
         else:
             print("You done fucked")
 
@@ -484,7 +548,7 @@ class GTTrains:
         title.grid(row=0, column=0, columnspan=2)
 
         reLabel = Label(frame, text="Reservaton ID")
-        reLabel = grid(row=1, column=0)
+        reLabel = reLabel.grid(row=1, column=0)
 
         entry = Entry(frame, width=50)
         entry.grid(row=1, column=1)
@@ -545,8 +609,8 @@ class GTTrains:
 
             frame = Frame(self.cancelReservationWin2)
             trainsDict = {
-            "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
-            "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
+                "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
+                "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
             }
 
             title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
