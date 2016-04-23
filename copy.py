@@ -532,26 +532,63 @@ class GTTrains:
         self.travelInfo = Toplevel()
         frame = Frame(self.travelInfo)
 
-        title = Label(frame, text="Travel Extras and Passenger Info")
-        title.grid(row=0, column=0, columnspan=2)
+        baggageNum = IntVar()
 
-        numBagLabel = Label(frame, text="Number of baggage")
-        numBagLabel.grid(row=1, column=0)
+        title = Label(frame, text = "Travel Extras & Passenger Info", fg="Blue",font="TkDefaultFont 24 bold")
+        title.grid(row = 0, column = 0, columnspan = 2)
 
-        print(trainChoice)
+        spaceLabel = Label(frame)
+        spaceLabel.grid(row=1, column=0, columnspan=2)
 
+        numBagLabel = Label(frame, text = "Number of Baggage", font="TkDefaultFont 13")
+        numBagLabel.grid(row = 2, column = 0)
+
+        bagEntryBox = Spinbox(frame, from_= 0, to=4, increment=1, textvariable=baggageNum, state='readonly', font="TkDefaultFont 13")
+        bagEntryBox.grid(row = 2, column =1)
+
+        bagInfo = Label(frame, text = "Every passenger can bring up to 4 baggage, 2 free of charge, 2 for $30 per bag")
+        bagInfo.grid(row=3, column=0, columnspan = 2)
+
+        spaceLabel2 = Label(frame)
+        spaceLabel2.grid(row=4, column=0, columnspan=2)
+
+        passNameLabel = Label(frame, text= "Passenger Name", font="TkDefaultFont 13")
+        passNameLabel.grid(row=5, column=0)
+
+        passName = Entry(frame)
+        passName.grid(row=5, column=1)
+
+        spaceLabel3 = Label(frame)
+        spaceLabel3.grid(row=6, column=0, columnspan=2)
+
+        nextB = Button(frame, text = "Next", command = self.goToConfirmation)
+        nextB.grid(row =7 , column = 1)
+
+        backB = Button(frame, text = "Back")
+        backB.grid(row = 7, column = 0)
+
+        
+
+        frame.pack()
+
+        #print(trainChoice)
+        
     def goToConfirmation(self):
+        
+        self.travelInfo.withdraw()
         self.confirmScreen = Toplevel()
         frame = Frame(self.confirmScreen)
 
-        title = Label(frame, text="Confirmation")
-        title.grid(row=0, column=0, columnspan=2)
+        title = Label(frame, text = "Confirmation")
+        title.grid(row = 0, column = 0, columnspan = 2)
 
-        reLabel = Label(frame, text="Reservaton ID")
-        reLabel = reLabel.grid(row=1, column=0)
+        reLabel = Label(frame, text = "Reservaton ID")
+        reLabel.grid(row = 1, column = 0)
 
-        entry = Entry(frame, width=50)
-        entry.grid(row=1, column=1)
+        entry = Entry(frame, width = 50)
+        entry.grid(row = 1, column = 1)
+
+        frame.pack()
 
 
     def updateReservation(self):
