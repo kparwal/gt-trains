@@ -159,6 +159,8 @@ class GTTrains:
             messagebox.showerror("Invalid Username", "Please Enter A Valid Username Or Try Registering")
 
     def customerFunctionality(self):
+        self.fullTrainList = [] # will track a single customer's full train list. Reset at this point since coming back to this screen indicates "new"
+
         self.win.withdraw()
         self.funcScreen = Toplevel()
         frame = Frame(self.funcScreen)
@@ -343,7 +345,11 @@ class GTTrains:
             return deep_list
 
     def makeNewReservation(self):
-        self.funcScreen.withdraw()
+        try:
+            self.funcScreen.withdraw()
+        except:
+            print("WHAT DO YOU MEAN WHEN YOU NOD YOUR HEAD YES")
+
         self.searchTrains = Toplevel()
         frame = Frame(self.searchTrains)
         data = self.Connect()
@@ -432,7 +438,7 @@ class GTTrains:
         cursor.close()
         data.close()
 
-        print(datalist)
+      #  print(datalist)
         self.listofTrains = datalist
 
         label = Label(frame, text="Train")
@@ -506,33 +512,38 @@ class GTTrains:
     def getTrainChosen(self):
         train = self.trainChosen.get()
 
+        self.classChosen = ""
+
         trainIndex = train // 10
         indicator = train % 10
 
-        finalChoice = [self.listofTrains[trainIndex][0]]
-
-        classChosen = ""
+        self.fullTrainList = self.fullTrainList + [self.listofTrains[trainIndex]]
+        print(self.fullTrainList)
 
         if (indicator == 0):
-            classChosen = "First Class"
-            finalChoice = finalChoice + [self.listofTrains[trainIndex][5]]
+            del self.fullTrainList[len(self.fullTrainList) - 1][6]
+            self.classChosen = "First"
         elif (indicator == 1):
-            classChosen = "Second Class"
-            finalChoice = finalChoice + [self.listofTrains[trainIndex][6]]
+            del self.fullTrainList[len(self.fullTrainList) - 1][5]
+            self.classChosen = "Second"
         else:
             print("You done fucked")
 
-        return (finalChoice)
+
+        print(self.fullTrainList)
+
+        print(self.fullTrainList)
 
 
     def goToTravelExtras(self):
-        trainChoice = self.getTrainChosen()
+        self.getTrainChosen()
         self.trainsTable.withdraw()
 
         self.travelInfo = Toplevel()
         frame = Frame(self.travelInfo)
 
-        baggageNum = IntVar()
+        self.baggageNum = IntVar()
+        self.passengerName = StringVar()
 
         title = Label(frame, text = "Travel Extras & Passenger Info", fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -543,7 +554,7 @@ class GTTrains:
         numBagLabel = Label(frame, text = "Number of Baggage", font="TkDefaultFont 13")
         numBagLabel.grid(row = 2, column = 0)
 
-        bagEntryBox = Spinbox(frame, from_= 0, to=4, increment=1, textvariable=baggageNum, state='readonly', font="TkDefaultFont 13")
+        bagEntryBox = Spinbox(frame, from_= 0, to = 4, increment = 1, textvariable = self.baggageNum, state='readonly', font="TkDefaultFont 13")
         bagEntryBox.grid(row = 2, column =1)
 
         bagInfo = Label(frame, text = "Every passenger can bring up to 4 baggage, 2 free of charge, 2 for $30 per bag")
@@ -555,26 +566,176 @@ class GTTrains:
         passNameLabel = Label(frame, text= "Passenger Name", font="TkDefaultFont 13")
         passNameLabel.grid(row=5, column=0)
 
-        passName = Entry(frame)
+        passName = Entry(frame, textvariable = self.passengerName)
         passName.grid(row=5, column=1)
 
         spaceLabel3 = Label(frame)
         spaceLabel3.grid(row=6, column=0, columnspan=2)
 
-        nextB = Button(frame, text = "Next", command = self.goToConfirmation)
+        nextB = Button(frame, text = "Next", command = self.updateFullList)
         nextB.grid(row =7 , column = 1)
 
         backB = Button(frame, text = "Back")
         backB.grid(row = 7, column = 0)
 
-        
+        frame.pack()
+
+
+    def updateFullList(self):
+        self.fullTrainList[len(self.fullTrainList) - 1] = self.fullTrainList[len(self.fullTrainList) - 1] + [self.passengerName.get(), self.baggageNum.get()]
+        print(self.fullTrainList)
+        self.makeReservation()
+
+    def makeReservation(self):
+        cost = IntVar()
+        cost.set(99)
+
+        try:
+            self.travelInfo.withdraw()
+        except:
+            print("Bruaaaahhhhh")
+
+        self.make1 = Toplevel()
+        frame = Frame(self.make1)
+
+        title = Label(frame, text = "Make Reservation")
+        title.grid(row = 0, column = 0, columnspan = 2)
+
+        discountLabel = Label(frame, text = "Discount or nah")
+        discountLabel.grid(row = 1, column = 0, sticky = EW)
+
+        cLabel = Label(frame, text = "Total cost")
+        cLabel.grid(row = 2, column = 0)
+
+        cEntry = Entry(frame, width = 30, textvariable = cost)
+        cEntry.grid(row = 2, column = 1)
+
+        cardLabel = Label(frame, text = "Use Card")
+        cardLabel.grid(row = 3, column = 0)
+
+        cardBox = ttk.Combobox(frame)
+        cardBox['values'] = ["123", "456", "789"]
+        cardBox.grid(row = 3, column = 1)
+
+        addCardButton = Button(frame, text = "Add a card", command = self.addCardScreen)
+        addCardButton.grid(row = 3, column = 2)
+
+        cont = Button(frame, text = "Continue adding trains", command = self.addMore)
+        cont.grid(row = 4, column = 0)
+
+        back = Button(frame, text = "Back")
+        back.grid(row = 5, column = 0)
+
+        next = Button(frame, text = "Next")
+        next.grid(row = 5, column = 1)
+
+        currLabel = Label(frame, text = "Currently Selected")
+        currLabel.grid(row = 6, column = 0, columnspan = 2, sticky = W)
+
+        label1 = Label(frame, text = "Train")
+        label1.grid(row = 7, column = 0)
+
+        label2 = Label(frame, text = "Time (Duration)")
+        label2.grid(row = 7, column = 1)
+
+        label3 = Label(frame, text = "Departs from")
+        label3.grid(row = 7, column = 2)
+
+        label4 = Label(frame, text = "Arrives at")
+        label4.grid(row = 7, column = 3)
+
+        label5 = Label(frame, text = "Class")
+        label5.grid(row = 7, column = 4)
+
+        label6 = Label(frame, text = "Price")
+        label6.grid(row = 7, column = 5)
+
+        label7 = Label(frame, text = "Number of baggages")
+        label7.grid(row = 7, column = 6)
+
+        label8 = Label(frame, text = "Passenger Name")
+        label8.grid(row = 7, column = 7)
+
+        label9 = Label(frame, text = "Remove")
+        label9.grid(row = 7, column = 8)
+
+
+        rowCount = 8
+        colCount = 0
+
+        self.removeTracker = IntVar()
+        removeIndex = 0
+
+        for indi in self.fullTrainList:
+            temp = Radiobutton(frame, text = indi[0], variable = self.removeTracker, value = removeIndex)
+            temp.grid(row = rowCount, column = colCount)    # col 0 has the train name
+            colCount = colCount + 1
+            removeIndex = removeIndex + 1
+
+            start = indi[3]
+            end = indi[4]
+            duration = end - start
+
+            hours = duration.total_seconds() // 3600
+            minutes = (duration.total_seconds() - (hours * 3600)) // 60
+            seconds = duration.total_seconds() - (hours * 3600) - (minutes * 60)
+            strDuration = str(hours) + " hours " + str(minutes) + "minutes " + str(seconds) + "seconds"
+
+            temp = Label(frame, text = strDuration) # col 1 has the duration
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[1]) # col 2 has the departure station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[2]) # col 3 has the arrival station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = self.classChosen) # col 4 has the class type
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[5]) # col 5 has the price
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[7]) # col 6 has baggage num
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[6]) # col 7 has the name
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Button(frame, text = "Remove", command = self.removeTrain)
+            temp.grid(row = rowCount, column = colCount)
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+            print(indi)
 
         frame.pack()
 
-        #print(trainChoice)
-        
+    def removeTrain(self):
+        self.make1.withdraw()
+        removeIndex = self.removeTracker.get()
+
+        del self.fullTrainList[removeIndex]
+        self.makeReservation()
+
+    def addMore(self):
+        self.make1.withdraw()
+        self.makeNewReservation()
+
+    def addCardScreen(self):
+        print("J4L niggas")
+
     def goToConfirmation(self):
-        
+        self.make1.withdraw()
+
         self.travelInfo.withdraw()
         self.confirmScreen = Toplevel()
         frame = Frame(self.confirmScreen)
@@ -585,9 +746,16 @@ class GTTrains:
         reLabel = Label(frame, text = "Reservaton ID")
         reLabel.grid(row = 1, column = 0)
 
-        entry = Entry(frame, width = 50)
+        entry = Entry(frame, width = 50, textvariable = num)
         entry.grid(row = 1, column = 1)
+        isValid = False
 
+        while (not isValid):
+            randId = random.randrange(1000, 9999)
+            #check that ID is unique
+            isValid = True
+
+        num.set(randId)
         frame.pack()
 
 
