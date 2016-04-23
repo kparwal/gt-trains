@@ -800,9 +800,6 @@ class GTTrains:
 
         cursor.close()
         data.close()
-
-        # aList = aList[0][0]
-
         num = IntVar()
 
         title = Label(frame, text = "Confirmation")
@@ -813,14 +810,14 @@ class GTTrains:
 
         entry = Entry(frame, width = 50, textvariable = num)
         entry.grid(row = 1, column = 1)
-        isValid = False
+        # isValid = False
+        # 
+        # while (not isValid):
+        #     randId = random.randrange(1000, 9999)
+        #     #check that ID is unique
+        #     isValid = True
 
-        while (not isValid):
-            randId = random.randrange(1000, 9999)
-            #check that ID is unique
-            isValid = True
-
-        num.set(randId)
+        num.set(aList)
         frame.pack()
 
 
