@@ -437,7 +437,7 @@ class GTTrains:
         self.dateForSQL = self.parseDate(self.departDate.get())
 
         try:
-            if (userDate < datetime.datetime.today()):
+            if (self.userDate < datetime.datetime.today()):
                 messagebox.showerror("Incorrect Date", "Please enter future date.")
                 return
         except:
@@ -944,19 +944,33 @@ class GTTrains:
 
         data = self.Connect()
         cursor = data.cursor()
-        query ="DELETE FROM Payment_Info WHERE Card_Num = '{}'".format(cardSelect)
-        cursor.execute(query)
-        data.commit()
+        valid = True
+        check = "SELECT `Departure_Date` FROM `Reserve_Train` NATURAL JOIN `Reservation` WHERE `Card_Num`='{}'".format(cardSelect)
+        cursor.execute(check)
+        checklist = self.nested_tuple_to_list(cursor.fetchall(), False)
         cursor.close()
         data.close()
+        for result in checklist:
+            date = self.parseDate(result[0])
+            advance = int(str(date - datetime.date.today()).split(' ')[0])
+            if advance > -1:
+                valid = False
+        if valid:
+            data = self.Connect()
+            cursor = data.cursor()
+            query ="DELETE FROM Payment_Info WHERE Card_Num = '{}'".format(cardSelect)
+            cursor.execute(query)
+            data.commit()
+            cursor.close()
+            data.close()
 
-        messagebox.showinfo("Success!", "Your Card was Removed")
+            messagebox.showinfo("Success!", "Your Card was Removed")
 
-        self.addCards.withdraw()
-        #self.make1.deiconify()
-        self.makeReservation()
-
-
+            self.addCards.withdraw()
+            #self.make1.deiconify()
+            self.makeReservation()
+        else:
+            messagebox.showerror("Failed!", "This card has outstanding reservations")
     def calcCost(self, flag):
         db = self.Connect()
         cursor = db.cursor()
