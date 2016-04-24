@@ -635,11 +635,33 @@ class GTTrains:
         cost.set(self.calcCost())
         self.cardChosen = StringVar()
 
-        self.travelInfo.withdraw()
+        try:
+            self.travelInfo.withdraw()
+        except:
+            pass
+        
         self.make1 = Toplevel()
         self.make1.title("Make New Reservation")
         self.winList.append(self.make1)
         frame = Frame(self.make1)
+
+        data = self.Connect()
+        cursor = data.cursor()
+        query ="SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
+        self.datalist1 = cursor.execute(query)
+        self.datalist1 = cursor.fetchall()
+        cursor.close()
+        data.close()
+
+        self.cardList=[]
+        for item in self.datalist1:
+            self.cardList.append(item[0])
+
+
+        self.fullCardList={}
+        for item in range(len(self.cardList)):
+            self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
+            
 
         title = Label(frame, text = "Make Reservation")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -781,7 +803,8 @@ class GTTrains:
         self.cvv = IntVar()
         self.expDate = StringVar()
         self.cardChosen1 = StringVar()
-
+        
+        """
         data = self.Connect()
         cursor = data.cursor()
         query = "SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
@@ -794,18 +817,11 @@ class GTTrains:
         for item in self.datalist1:
             self.cardList.append(item[0])
 
-        
-
-        #newList=[]
-        #for item in self.cardList:
-        #    newList.append(item)
-        
-        #for num in range(len(self.cardList)):
-        #    self.cardList[num] = self.cardList[num][12:]
 
         self.fullCardList={}
         for item in range(len(self.cardList)):
             self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
+        """
 
         
 
@@ -865,16 +881,12 @@ class GTTrains:
         submitButton2.grid(row = 7, column = 3, columnspan=2)
 
        
-
-        #print(datalist)
-
         
         frame.pack()
         
 
         
     def submitCard(self):
-        #pass
         self.expireDate = self.expDate.get()
         self.expireDate = self.expireDate.split('-')
         self.expireDate = datetime.date(int(self.expireDate[0]), int(self.expireDate[1]), 1)
@@ -905,7 +917,8 @@ class GTTrains:
         messagebox.showinfo("Success!", "Your Card was Added")
 
         self.addCards.withdraw()
-        self.make1.deiconify()
+        #self.make1.deiconify()
+        self.makeReservation()
 
         
 
@@ -921,9 +934,11 @@ class GTTrains:
         data.close()
 
         messagebox.showinfo("Success!", "Your Card was Removed")
-        
-        #print(cardSelect)
-        #print(self.fullCardList)   
+
+        self.addCards.withdraw()
+        #self.make1.deiconify()
+        self.makeReservation()
+   
 
     def calcCost(self):
         cost = 0
