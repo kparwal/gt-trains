@@ -480,7 +480,7 @@ class GTTrains:
         if(self.listofTrains==[] or self.listofTrains == None):
             messagebox.showerror("Train Route Not Available", "There is no train route avaliable for those two stations.")
             return
-        
+
         self.searchTrains.withdraw()
         self.trainsTable = Toplevel()
         self.trainsTable.title("Make New Reservation")
@@ -640,7 +640,7 @@ class GTTrains:
             self.travelInfo.withdraw()
         except:
             pass
-        
+
         self.make1 = Toplevel()
         self.make1.title("Make New Reservation")
         self.winList.append(self.make1)
@@ -662,7 +662,7 @@ class GTTrains:
         self.fullCardList={}
         for item in range(len(self.cardList)):
             self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
-            
+
 
         title = Label(frame, text = "Make Reservation")
         title.grid(row = 0, column = 0, columnspan = 2)
@@ -681,7 +681,7 @@ class GTTrains:
         cardLabel.grid(row = 3, column = 0)
 
         cardBox = ttk.Combobox(frame, textvariable = self.cardChosen)
-        cardBox['values'] = ["123", "456", "789"]
+        cardBox['values'] = list(self.fullCardList.keys())
         cardBox.grid(row = 3, column = 1)
 
         addCardButton = Button(frame, text = "Add a card", command = self.addCardScreen)
@@ -759,7 +759,7 @@ class GTTrains:
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
-            temp = Label(frame, text = self.classChosen) # col 4 has the class type
+            temp = Label(frame, text = indi[6]) # col 4 has the class type
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
@@ -767,11 +767,11 @@ class GTTrains:
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
-            temp = Label(frame, text = indi[7]) # col 6 has baggage num
+            temp = Label(frame, text = indi[8]) # col 6 has baggage num
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
-            temp = Label(frame, text = indi[6]) # col 7 has the name
+            temp = Label(frame, text = indi[7]) # col 7 has the name
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
@@ -804,7 +804,7 @@ class GTTrains:
         self.cvv = IntVar()
         self.expDate = StringVar()
         self.cardChosen1 = StringVar()
-        
+
         """
         data = self.Connect()
         cursor = data.cursor()
@@ -824,7 +824,7 @@ class GTTrains:
             self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
         """
 
-        
+
 
         title = Label(frame, text= "Payment Information", fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row=0, column=0, columnspan=5)
@@ -881,12 +881,12 @@ class GTTrains:
         submitButton2 = Button(frame, text = "Submit", command = self.removeCard)
         submitButton2.grid(row = 7, column = 3, columnspan=2)
 
-       
-        
-        frame.pack()
-        
 
-        
+
+        frame.pack()
+
+
+
     def submitCard(self):
         self.expireDate = self.expDate.get()
         self.expireDate = self.expireDate.split('-')
@@ -905,7 +905,7 @@ class GTTrains:
         if (self.expireDate < datetime.date.today()):
             messagebox.showerror("Invalid Input", "Expiration Date Must Be Greater Than Today")
             return
-        
+
 
         data = self.Connect()
         cursor = data.cursor()
@@ -921,7 +921,7 @@ class GTTrains:
         #self.make1.deiconify()
         self.makeReservation()
 
-        
+
 
     def removeCard(self):
         cardSelect = self.fullCardList[self.cardChosen1.get()]
@@ -939,7 +939,7 @@ class GTTrains:
         self.addCards.withdraw()
         #self.make1.deiconify()
         self.makeReservation()
-   
+
 
     def calcCost(self):
         cost = 0
@@ -1023,7 +1023,7 @@ class GTTrains:
         searchButton.grid(row=1, column=2)
 
         buttonBack = Button(frame, text="Back", command=self.funcBack)
-        buttonBack.grid(row=2, column=1) 
+        buttonBack.grid(row=2, column=1)
 
         frame.pack()
 
@@ -1446,7 +1446,6 @@ class GTTrains:
         except:
             print("Cannot connect to database")
 
-print("repost")
 window = Tk()
 rankObj = GTTrains(window)
 window.mainloop()
