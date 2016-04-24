@@ -1468,7 +1468,54 @@ class GTTrains:
             return
 
     def viewRevenueReport(self):
-        print("hi")
+        self.funcScreenManager.withdraw()
+        self.viewRevenueWin = Toplevel()
+        self.winList.append(self.viewRevenueWin)
+        self.viewRevenueWin.title("Revenue Report")
+        revDict = []
+        data = self.Connect()
+        cursor = data.cursor()
+        query = "SELECT Month, SUM(Total_Cost) FROM (SELECT MIN(MONTH(`Departure_Date`)) as Month, Total_Cost FROM Reservation JOIN Reserve_Train ON Reservation.`ReservationID`=Reserve_Train.`ReservationID` WHERE `Departure_Date` BETWEEN DATE_FORMAT(NOW() - INTERVAL 3 MONTH, '%Y-%m-01 00:00:00') AND DATE_FORMAT(LAST_DAY(NOW() - INTERVAL 1 MONTH), '%Y-%m-%d 23:59:59') GROUP BY Reserve_Train.`ReservationID` ORDER BY Month) AS A GROUP BY Month"
+        cursor.execute(query)
+        datalist = cursor.fetchall()
+        cursor.close()
+        data.close()
+        frame = Frame(self.viewRevenueWin)
+
+        title = Label(frame, text="View Revenue Report", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=0, columnspan=2)
+
+        label = Label(frame, text="Month", font="TkDefaultFont 16 bold")
+        label.grid(row=1, column=0, sticky=W)
+
+        label1 = Label(frame, text="Revenue", font="TkDefaultFont 16 bold")
+        label1.grid(row=1, column=1, sticky=W)
+
+        rowCount = 2
+        colCount = 0
+
+        for data in datalist:
+            revDict.append([datetime.date(1900, data[0], 1).strftime('%B'),"$"+str(data[1])])
+
+        for lists in revDict:
+            temp = Label(frame, text=lists[0])
+            temp.grid(row=rowCount, column=colCount, sticky=W)
+            colCount = colCount + 1
+
+            temp = Label(frame, text=lists[1])
+            temp.grid(row=rowCount, column=colCount, sticky=W)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+        space = Label(frame)
+        space.grid(row=rowCount + 1, column=0, sticky=W)
+
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=rowCount + 2, column=0, sticky=W)
+
+        frame.pack()
 
     def viewPopularRouteReport(self):
         print("hi")
@@ -1481,6 +1528,7 @@ class GTTrains:
         self.win.deiconify()
         self.username.set("")
         self.password.set("")
+        self.winList = []
         self.userstate = None
 
     def funcBack(self):
