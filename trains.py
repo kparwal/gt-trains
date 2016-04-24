@@ -367,7 +367,7 @@ class GTTrains:
         frame = Frame(self.searchTrains)
         data = self.Connect()
         cursor = data.cursor()
-        nameQuery = "SELECT DISTINCT Location FROM Station"
+        nameQuery = "SELECT DISTINCT Station_Name FROM Station"
         cursor.execute(nameQuery)
         location_list = self.nested_tuple_to_list(cursor.fetchall())
         cursor.close()
@@ -449,22 +449,23 @@ class GTTrains:
                 FROM
                 (SELECT `A`.`Station_Name` AS `Depart From` , `B`.`Station_Name` AS `Arrive At` , `A`.`Train_Number` , `A`.`Departure_Time` , `B`.`Arrival_Time`
                 FROM (
+
                 SELECT *
                 FROM `Train_Stop`
                 NATURAL JOIN `Station`
-                WHERE `Location` = '{}'
+                WHERE `Station_Name` = '{}'
                 AND `Departure_Time` IS NOT NULL
-                ORDER BY `Location` ASC
+                ORDER BY `Station_Name` ASC
                 ) AS A
                 INNER JOIN (
+
                 SELECT *
                 FROM `Train_Stop`
                 NATURAL JOIN `Station`
-                WHERE `Location` = '{}'
+                WHERE `Station_Name` = '{}'
                 AND `Arrival_Time` IS NOT NULL
-                ORDER BY `Location` ASC
-                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number` WHERE `A`.`Station_Name` != `B`.`Station_Name`
-                ) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
+                ORDER BY `Station_Name` ASC
+                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number`) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
                 AS E INNER JOIN `Train_Route` AS F ON `E`.`Train_Number`=`F`.`Train_Number`
                 """.format(self.chosenDeparture.get(), self.chosenArrival.get())
         cursor.execute(query)
