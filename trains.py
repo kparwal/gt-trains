@@ -433,6 +433,8 @@ class GTTrains:
                 return
 
         self.userDate = self.parseDate(self.departDate.get())
+        self.dateForSQL = self.parseDate(self.departDate.get())
+
         try:
             if (userDate < datetime.datetime.today()):
                 messagebox.showerror("Incorrect Date", "Please enter future date.")
@@ -630,7 +632,9 @@ class GTTrains:
     def updateFullList(self):
         if(self.passengerName.get()==""):
             messagebox.showerror("Name Missing","Please input a Passenger Name.")
+
             return
+
         self.fullTrainList[len(self.fullTrainList) - 1] = self.fullTrainList[len(self.fullTrainList) - 1] + [self.passengerName.get(), self.baggageNum.get()]
         self.makeReservation()
 
@@ -782,10 +786,10 @@ class GTTrains:
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
-            self.userDate = str(self.userDate).split("-")
-            month = self.getMonthDict[self.userDate[1]]
-            year = self.userDate[0]
-            day = self.userDate[2]
+            finalFormat = str(self.userDate).split("-")
+            month = self.getMonthDict[finalFormat[1]]
+            year = finalFormat[0]
+            day = finalFormat[2]
             temp = Label(frame, text = month + " " + day + " " + year)
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
@@ -896,21 +900,14 @@ class GTTrains:
         submitButton2 = Button(frame, text = "Submit", command = self.removeCard)
         submitButton2.grid(row = 7, column = 3, columnspan=2)
 
-
-
         frame.pack()
-
-
 
     def submitCard(self):
         self.expireDate = self.expDate.get()
         self.expireDate = self.expireDate.split('-')
         self.expireDate = datetime.date(int(self.expireDate[0]), int(self.expireDate[1]), 1)
 
-
-
         self.cardInfos = [self.cardName, self.cardNum, self.cvv, self.expDate]
-
 
         for item in self.cardInfos:
             if item.get() == "":
@@ -920,7 +917,6 @@ class GTTrains:
         if (self.expireDate < datetime.date.today()):
             messagebox.showerror("Invalid Input", "Expiration Date Must Be Greater Than Today")
             return
-
 
         data = self.Connect()
         cursor = data.cursor()
@@ -935,8 +931,6 @@ class GTTrains:
         self.addCards.withdraw()
         #self.make1.deiconify()
         self.makeReservation()
-
-
 
     def removeCard(self):
         cardSelect = self.fullCardList[self.cardChosen1.get()]
@@ -964,7 +958,6 @@ class GTTrains:
                 cost = cost + (30 * (items[8] - 2))
             cost = cost + items[5]
 
-
         return(cost)
 
     def goToConfirmation(self):
@@ -989,11 +982,12 @@ class GTTrains:
         aList = cursor.fetchall()[0][0]
 
         for lists in self.fullTrainList:
+            print(lists)
             fetchNumber = "SELECT `Train_Number` from `Train_Name` WHERE `Name` = '{}'".format(lists[0])
             cursor.execute(fetchNumber)
             num = cursor.fetchall()[0][0]
             insert = "INSERT INTO `Reserve_Train` (`ReservationID`, `Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`, `Num_Baggage`) VALUES ('{}'," \
-                     "'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')".format(aList, self.username.get(), lists[-2], self.departDate, lists[6], lists[1], lists[2], num, lists[-1])
+                     "'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')".format(aList, self.username.get(), lists[-2], self.dateForSQL, lists[6], lists[1], lists[2], num, lists[-1])
             cursor.execute(insert)
             data.commit()
 
@@ -1017,6 +1011,8 @@ class GTTrains:
 
         num.set(aList)
         frame.pack()
+
+
     def updateReservation(self):
         self.funcScreen.withdraw()
         self.reserveView = Toplevel()
@@ -1093,7 +1089,7 @@ class GTTrains:
             search_sql = """
                             SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost` FROM (
                             SELECT * FROM
-                            	(SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                                (SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
                             AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
                          """.format(self.cancelReservationID.get(), self.username.get())
             cursor.execute(search_sql)
@@ -1435,6 +1431,11 @@ class GTTrains:
         self.userstate = None
 
     def funcBack(self):
+        try:
+            self.confirmScreen.withdraw()
+        except:
+            pass
+
         for window in self.winList[1:]:
             window.destroy()
             self.winList.remove(window)
