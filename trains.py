@@ -1128,137 +1128,137 @@ class GTTrains:
         frame.pack()
 
     def cancelReservationSearch(self):
-        if True:
-            self.cancelReservationWin.withdraw()
-            self.cancelReservationWin2 = Toplevel()
-            self.cancelReservationWin2.title("Cancel Reservation")
-            self.winList.append(self.cancelReservationWin2)
-
-            self.cancelTotalCost = StringVar()
-            self.cancelDate = StringVar()
-            self.cancelRefund = StringVar()
-
-            frame = Frame(self.cancelReservationWin2)
-            # trainsDict = {
-            #     "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
-            #     "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
-            # }
-            data = self.Connect()
-            cursor = data.cursor()
-
-            search_sql = """
-                            SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost` FROM (
-                            SELECT * FROM
-                                (SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
-                            AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
-                         """.format(self.cancelReservationID.get(), self.username.get())
-            cursor.execute(search_sql)
-            searchlist = self.nested_tuple_to_list(cursor.fetchall(), False)
-            cursor.close()
-            data.close()
-            # print(searchlist)
-            trainsDict = {}
-            if len(searchlist) == 0:
-                messagebox.showerror("Error", "Enter a valid Reservation ID")
-                self.cancelReservationWin2.withdraw()
-                self.cancelReservation()
-            days_before = 9 ** 9
-            self.refund_percentage = 0.0
-            for result in searchlist:
-                date = self.parseDate(result[1])
-                advance = int(str(date - datetime.date.today()).split(' ')[0])
-                if advance < days_before:
-                    days_before = advance
-                trainsDict[result[0]] = result[1:8]
-                self.cancelTotalCost = str(result[8])
-            if days_before<= 0:
-                messagebox.showerror("Error", "Too late to cancel!")
-                self.cancelReservationWin2.withdraw()
-                self.cancelReservation()
-            elif days_before < 7 and days_before >=1:
-                self.refund_percentage = .5
-            else:
-                self.refund_percentage = .8
-            print(days_before)
-            self.cancelRefund = round(self.refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
-
-            title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
-            title.grid(row=0, column=3, columnspan=2)
-
-            label = Label(frame, text="Train \n (Train Number)")
-            label.grid(row=1, column=0)
-
-            label1 = Label(frame, text="Departure Date")
-            label1.grid(row=1, column=1)
-
-            label2 = Label(frame, text="Departure Time")
-            label2.grid(row=1, column=2)
-
-            label3 = Label(frame, text="Departs From")
-            label3.grid(row=1, column=3)
-
-            label4 = Label(frame, text="Arrives At")
-            label4.grid(row=1, column=4)
-
-            label5 = Label(frame, text="Class")
-            label5.grid(row=1, column=5)
-
-            label6 = Label(frame, text="# of Baggages")
-            label6.grid(row=1, column=6)
-
-            label7 = Label(frame, text="Passenger Name")
-            label7.grid(row=1, column=7)
-
-            rowCount = 2
-            colCount = 0
-
-            for key in trainsDict:
-                temp = Label(frame, text=key)
-                temp.grid(row=rowCount, column=colCount)
-                colCount = colCount + 1
-                items = trainsDict.get(key)
-                for i in range(len(trainsDict.get(key))):
-                    temp1 = Label(frame, text=items[i])
-                    temp1.grid(row=rowCount, column=colCount)
-                    colCount = colCount + 1
-                colCount = 0
-                rowCount = rowCount + 1
-
-            label8 = Label(frame, text="Total Cost of Reservation")
-            label8.grid(row=rowCount + 1, column=0, sticky=W)
-
-            entry8 = Label(frame, text=self.cancelTotalCost)
-            entry8.grid(row=rowCount + 1, column=1)
-
-            label9 = Label(frame, text="Date of Cancellation")
-            label9.grid(row=rowCount + 2, column=0, sticky=W)
-
-            entry9 = Label(frame, text=str(datetime.date.today()))
-            entry9.grid(row=rowCount + 2, column=1)
-
-            label10 = Label(frame, text="Amount to be Refunded")
-            label10.grid(row=rowCount + 3, column=0, sticky=W)
-
-            entry10 = Label(frame, text=self.cancelRefund)
-            entry10.grid(row=rowCount + 3, column=1)
-
-            label11 = Label(frame, text="Refund Percent")
-            label11.grid(row=rowCount + 4, column=0, sticky=W)
-
-            entry11 = Label(frame, text=str(self.refund_percentage))
-            entry11.grid(row=rowCount + 4, column=1)
-
-            buttonBack = Button(frame, text="Back", command=self.funcBack)
-            buttonBack.grid(row=rowCount + 5, column=0, stick=EW)
-
-            submitCancelB = Button(frame, text="Submit", command=self.setCancelled)
-            submitCancelB.grid(row=rowCount + 5, column=1, sticky=EW)
-
-            frame.pack()
-
-        else:
-            messagebox.showerror("Error", "Enter the correct ReservationID")
+        if (self.cancelReservationID.get()==""):
+            messagebox.showerror("Error", "Enter a valid ReservationID")
             return
+
+        self.cancelReservationWin.withdraw()
+        self.cancelReservationWin2 = Toplevel()
+        self.cancelReservationWin2.title("Cancel Reservation")
+        self.winList.append(self.cancelReservationWin2)
+
+        self.cancelTotalCost = StringVar()
+        self.cancelDate = StringVar()
+        self.cancelRefund = StringVar()
+
+        frame = Frame(self.cancelReservationWin2)
+        # trainsDict = {
+        #     "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
+        #     "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
+        # }
+        data = self.Connect()
+        cursor = data.cursor()
+
+        search_sql = """
+                        SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost` FROM (
+                        SELECT * FROM
+                            (SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                        AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
+                     """.format(self.cancelReservationID.get(), self.username.get())
+        cursor.execute(search_sql)
+        searchlist = self.nested_tuple_to_list(cursor.fetchall(), False)
+        cursor.close()
+        data.close()
+        # print(searchlist)
+        trainsDict = {}
+        if len(searchlist) == 0:
+            messagebox.showerror("Error", "Enter a valid Reservation ID")
+            self.cancelReservationWin2.withdraw()
+            self.cancelReservation()
+        days_before = 9 ** 9
+        self.refund_percentage = 0.0
+        for result in searchlist:
+            date = self.parseDate(result[1])
+            advance = int(str(date - datetime.date.today()).split(' ')[0])
+            if advance < days_before:
+                days_before = advance
+            trainsDict[result[0]] = result[1:8]
+            self.cancelTotalCost = str(result[8])
+        if days_before<= 0:
+            messagebox.showerror("Error", "Too late to cancel!")
+            self.cancelReservationWin2.withdraw()
+            self.cancelReservation()
+        elif days_before < 7 and days_before >=1:
+            self.refund_percentage = .5
+        else:
+            self.refund_percentage = .8
+        print(days_before)
+        self.cancelRefund = round(self.refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
+        if self.cancelRefund < 0:
+            self.cancelRefund = 0
+        title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=3, columnspan=2)
+
+        label = Label(frame, text="Train \n (Train Number)")
+        label.grid(row=1, column=0)
+
+        label1 = Label(frame, text="Departure Date")
+        label1.grid(row=1, column=1)
+
+        label2 = Label(frame, text="Departure Time")
+        label2.grid(row=1, column=2)
+
+        label3 = Label(frame, text="Departs From")
+        label3.grid(row=1, column=3)
+
+        label4 = Label(frame, text="Arrives At")
+        label4.grid(row=1, column=4)
+
+        label5 = Label(frame, text="Class")
+        label5.grid(row=1, column=5)
+
+        label6 = Label(frame, text="# of Baggages")
+        label6.grid(row=1, column=6)
+
+        label7 = Label(frame, text="Passenger Name")
+        label7.grid(row=1, column=7)
+
+        rowCount = 2
+        colCount = 0
+
+        for key in trainsDict:
+            temp = Label(frame, text=key)
+            temp.grid(row=rowCount, column=colCount)
+            colCount = colCount + 1
+            items = trainsDict.get(key)
+            for i in range(len(trainsDict.get(key))):
+                temp1 = Label(frame, text=items[i])
+                temp1.grid(row=rowCount, column=colCount)
+                colCount = colCount + 1
+            colCount = 0
+            rowCount = rowCount + 1
+
+        label8 = Label(frame, text="Total Cost of Reservation")
+        label8.grid(row=rowCount + 1, column=0, sticky=W)
+
+        entry8 = Label(frame, text=self.cancelTotalCost)
+        entry8.grid(row=rowCount + 1, column=1)
+
+        label9 = Label(frame, text="Date of Cancellation")
+        label9.grid(row=rowCount + 2, column=0, sticky=W)
+
+        entry9 = Label(frame, text=str(datetime.date.today()))
+        entry9.grid(row=rowCount + 2, column=1)
+
+        label10 = Label(frame, text="Amount to be Refunded")
+        label10.grid(row=rowCount + 3, column=0, sticky=W)
+
+        entry10 = Label(frame, text=self.cancelRefund)
+        entry10.grid(row=rowCount + 3, column=1)
+
+        label11 = Label(frame, text="Refund Percent")
+        label11.grid(row=rowCount + 4, column=0, sticky=W)
+
+        entry11 = Label(frame, text=str(self.refund_percentage))
+        entry11.grid(row=rowCount + 4, column=1)
+
+        buttonBack = Button(frame, text="Back", command=self.funcBack)
+        buttonBack.grid(row=rowCount + 5, column=0, stick=EW)
+
+        submitCancelB = Button(frame, text="Submit", command=self.setCancelled)
+        submitCancelB.grid(row=rowCount + 5, column=1, sticky=EW)
+
+        frame.pack()
 
     def setCancelled(self):
         # data = self.Connect()
