@@ -1163,7 +1163,7 @@ class GTTrains:
                 self.cancelReservationWin2.withdraw()
                 self.cancelReservation()
             days_before = 9 ** 9
-            refund_percentage = 0.0
+            self.refund_percentage = 0.0
             for result in searchlist:
                 date = self.parseDate(result[1])
                 advance = int(str(date - datetime.date.today()).split(' ')[0])
@@ -1176,11 +1176,12 @@ class GTTrains:
                 self.cancelReservationWin2.withdraw()
                 self.cancelReservation()
             elif days_before < 7 and days_before >=1:
-                refund_percentage = .5
+                self.refund_percentage = .5
             else:
-                refund_percentage = .8
+                self.refund_percentage = .8
             print(days_before)
-            self.cancelRefund = str(round(refund_percentage * round(float(self.cancelTotalCost)) - 50, 2))
+            self.cancelRefund = round(self.refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
+
             title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
             title.grid(row=0, column=3, columnspan=2)
 
@@ -1244,7 +1245,7 @@ class GTTrains:
             label11 = Label(frame, text="Refund Percent")
             label11.grid(row=rowCount + 4, column=0, sticky=W)
 
-            entry11 = Label(frame, text=str(refund_percentage))
+            entry11 = Label(frame, text=str(self.refund_percentage))
             entry11.grid(row=rowCount + 4, column=1)
 
             buttonBack = Button(frame, text="Back", command=self.funcBack)
@@ -1260,13 +1261,28 @@ class GTTrains:
             return
 
     def setCancelled(self):
+        # data = self.Connect()
+        # cursor = data.cursor()
+        # query =  "UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = 1 WHERE `Reservation`.`ReservationID` = {}".format(self.cancelReservationID.get())
+        # cursor.execute(query)
+        # data.commit()
+        # cursor.close()
+        # data.close()
+        refund_percentage = self.refund_percentage
+        if round(refund_percentage * round(float(self.cancelTotalCost)) - 50, 2) < 0:
+            self.cancelRefund = 0
+        self.cancelRefund = round(refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
+        refund_percentage *= 100
+        self.cancelTotalCost = str(float(self.cancelTotalCost) - self.cancelRefund)
+        print(self.cancelTotalCost)
         data = self.Connect()
         cursor = data.cursor()
-        query =  "UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = '1' WHERE `Reservation`.`ReservationID` = {}".format(self.cancelReservationID.get())
+        query = "UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = 1, `Total_Cost` = {} WHERE `ReservationID` = {} AND `C_Username`='{}'".format(float(self.cancelTotalCost), self.cancelReservationID.get(), self.username.get())
         cursor.execute(query)
         data.commit()
         cursor.close()
         data.close()
+        self.cancelRefund = str(self.cancelRefund)
         messagebox.showinfo("Success", "Successfully cancelled reservation!")
         self.funcBack()
 
