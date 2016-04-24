@@ -10,6 +10,10 @@ import random
 
 class GTTrains:
     def __init__(self, win):
+        self.getMonthDict = {"01" : "January", "02" : "February", "03" : "March",
+                                "04" : "April", "05" : "May", "06" : "June",
+                                "07" : "July", "08" : "August", "09" : "September",
+                                "10" : "October", "11" : "November", "12" : "December"}
         self.win = win
         self.image = PhotoImage(file="Buzz.gif")
         self.canvas = Canvas(self.win, width=100, height=100)
@@ -428,7 +432,7 @@ class GTTrains:
                 messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
                 return
 
-        userDate = self.parseDate(self.departDate.get())
+        self.userDate = self.parseDate(self.departDate.get())
         try:
             if (userDate < datetime.datetime.today()):
                 messagebox.showerror("Incorrect Date", "Please enter future date.")
@@ -723,8 +727,11 @@ class GTTrains:
         label8 = Label(frame, text = "Passenger Name")
         label8.grid(row = 7, column = 7)
 
-        label9 = Label(frame, text = "Remove")
+        label9 = Label(frame, text = "Departure Date")
         label9.grid(row = 7, column = 8)
+
+        label10 = Label(frame, text = "Remove")
+        label10.grid(row = 7, column = 9)
 
 
         rowCount = 8
@@ -772,6 +779,14 @@ class GTTrains:
             colCount = colCount + 1
 
             temp = Label(frame, text = indi[7]) # col 7 has the name
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            self.userDate = str(self.userDate).split("-")
+            month = self.getMonthDict[self.userDate[1]]
+            year = self.userDate[0]
+            day = self.userDate[2]
+            temp = Label(frame, text = month + " " + day + " " + year)
             temp.grid(row = rowCount, column = colCount)
             colCount = colCount + 1
 
@@ -997,10 +1012,11 @@ class GTTrains:
         entry.grid(row = 1, column = 1)
         entry.configure(state='disabled')
 
+        backB = Button(frame, text = "Continue", command = self.funcBack)
+        backB.grid(row = 1, column = 2)
+
         num.set(aList)
         frame.pack()
-
-
     def updateReservation(self):
         self.funcScreen.withdraw()
         self.reserveView = Toplevel()
