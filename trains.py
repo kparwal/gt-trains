@@ -437,7 +437,7 @@ class GTTrains:
         self.dateForSQL = self.parseDate(self.departDate.get())
 
         try:
-            if (self.userDate < datetime.datetime.today()):
+            if (self.userDate < datetime.date.today()):
                 messagebox.showerror("Incorrect Date", "Please enter future date.")
                 return
         except:
@@ -1022,12 +1022,17 @@ class GTTrains:
         flag = self.isStudent()
         finalCost = self.calcCost(flag)
 
+        if(len(self.fullTrainList) == 0):
+            messagebox.showerror("Empty Reservation", "Cannot submit empty reservations!")
+            self.funcBack()
+
         sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')".format(0, self.username.get(), self.fullCardList[self.cardChosen.get()], finalCost)
         cursor.execute(sql)
         data.commit()
 
         self.travelInfo.withdraw()
         self.confirmScreen = Toplevel()
+        self.winList.append(self.confirmScreen)
         frame = Frame(self.confirmScreen)
 
         sql = "SELECT MAX(`ReservationID`) FROM `Reservation`"
@@ -1064,6 +1069,8 @@ class GTTrains:
 
         num.set(aList)
         frame.pack()
+
+        self.fullTrainList = []
 
 
     def updateReservation(self):
@@ -1532,11 +1539,6 @@ class GTTrains:
         self.userstate = None
 
     def funcBack(self):
-        try:
-            self.confirmScreen.withdraw()
-        except:
-            pass
-
         for window in self.winList[1:]:
             window.destroy()
             self.winList.remove(window)
