@@ -20,8 +20,9 @@ class GTTrains:
         self.username = StringVar()
         self.password = StringVar()
         self.userstate = None
-        # self.username.set("A")
-        # self.password.set("A1")
+        self.winList = []
+        #self.username.set("A")
+        #self.password.set("A1")
         self.win.title("Login")
 
         lb0 = Label(self.frame, text="Username:")
@@ -45,6 +46,7 @@ class GTTrains:
     def register(self):
         self.win.withdraw()
         self.winregister = Toplevel()
+        self.winregister.title("Register")
         canvas = Canvas(self.winregister, width=100, height=100)
         canvas.pack()
         canvas.create_image(50, 50, anchor=CENTER, image=self.image)
@@ -161,9 +163,10 @@ class GTTrains:
 
     def customerFunctionality(self):
         self.fullTrainList = [] # will track a single customer's full train list. Reset at this point since coming back to this screen indicates "new"
-
         self.win.withdraw()
         self.funcScreen = Toplevel()
+        self.funcScreen.title("Customer Functionality")
+        self.winList.append(self.funcScreen)
         frame = Frame(self.funcScreen)
 
         title = Label(frame, text="Choose Functionality", fg="Blue", font="TkDefaultFont 24 bold")
@@ -198,6 +201,8 @@ class GTTrains:
     def managerFunctionality(self):
         self.win.withdraw()
         self.funcScreenManager = Toplevel()
+        self.funcScreenManager.title("Manager Functionality")
+        self.winList.append(self.funcScreenManager)
         frame = Frame(self.funcScreenManager)
 
         title = Label(frame, text="Choose Functionality", fg="Blue", font="TkDefaultFont 24 bold")
@@ -217,6 +222,8 @@ class GTTrains:
     def viewTrainSchedule(self):
         self.funcScreen.withdraw()
         self.trainView = Toplevel()
+        self.trainView.title("View Train Schedule")
+        self.winList.append(self.trainView)
         frame = Frame(self.trainView)
 
         self.trainNumber = StringVar()
@@ -230,11 +237,11 @@ class GTTrains:
         trainNumEntry = Entry(frame, textvariable=self.trainNumber)
         trainNumEntry.grid(row=1, column=1)
 
-        spaceLabel = Label(frame, text="")
-        spaceLabel.grid(row=2, column=0)
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=2, column=0, sticky=EW)
 
         searchButton = Button(frame, text="Search", command=self.getTrainSchedule)
-        searchButton.grid(row=3, column=0, sticky=W)
+        searchButton.grid(row=2, column=1, sticky=EW)
 
         frame.pack()
 
@@ -249,16 +256,16 @@ class GTTrains:
         else:
             messagebox.showerror("Incorrect Train Name", "Please type an existing Train name")
             return
-        print(train)
         query = "SELECT * FROM Train_Stop WHERE Train_Number = '{}' ORDER BY Arrival_Time ASC".format(train)
         schedule = cursor.execute(query)
         schedule = cursor.fetchall()
         cursor.close()
         data.close()
-        print(schedule)
 
         self.trainView.withdraw()
         self.scheduleView = Toplevel()
+        self.winList.append(self.scheduleView)
+        self.scheduleView.title("View Train Schedule")
         frame = Frame(self.scheduleView)
 
         dataSet = []
@@ -275,7 +282,6 @@ class GTTrains:
                     rowlist.append(item)
             dataSet.append(rowlist)
 
-        print(dataSet)
         trainsDict = {}
         count = 0
         for row in dataSet:
@@ -327,6 +333,10 @@ class GTTrains:
                 temp.grid(row=rowCount, column=colCount)
                 colCount += 1
             rowCount += 1
+
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=rowCount+1, column=0, sticky=EW)
+
         frame.pack()
 
     def nested_tuple_to_list(self, tuple_struct, flat=True):
@@ -352,6 +362,8 @@ class GTTrains:
             print("WHAT DO YOU MEAN WHEN YOU NOD YOUR HEAD YES")
 
         self.searchTrains = Toplevel()
+        self.searchTrains.title("Make New Reservation")
+        self.winList.append(self.searchTrains)
         frame = Frame(self.searchTrains)
         data = self.Connect()
         cursor = data.cursor()
@@ -388,7 +400,10 @@ class GTTrains:
         dateBox.grid(row=3, column=1)
 
         findTrains = Button(frame, text="Find Trains", command=self.findTrains)
-        findTrains.grid(row=4, column=0, sticky=E)
+        findTrains.grid(row=4, column=1, sticky=EW)
+
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=4, column=0, sticky=EW)
 
         frame.pack()
 
@@ -465,8 +480,9 @@ class GTTrains:
             return
         
         self.searchTrains.withdraw()
-
         self.trainsTable = Toplevel()
+        self.trainsTable.title("Make New Reservation")
+        self.winList.append(self.trainsTable)
         frame = Frame(self.trainsTable)
 
         label = Label(frame, text="Train")
@@ -532,7 +548,7 @@ class GTTrains:
         nextB = Button(frame, text="Next", command=self.goToTravelExtras)
         nextB.grid(row=rowCount + 1, column=1, sticky=EW)
 
-        backB = Button(frame, text="Back")
+        backB = Button(frame, text="Back", command=self.back)
         backB.grid(row=rowCount + 1, column=0, sticky=EW)
 
         frame.pack()
@@ -561,8 +577,9 @@ class GTTrains:
     def goToTravelExtras(self):
         self.getTrainChosen()
         self.trainsTable.withdraw()
-
         self.travelInfo = Toplevel()
+        self.travelInfo.title("Make New Reservation")
+        self.winList.append(self.travelInfo)
         frame = Frame(self.travelInfo)
 
         self.baggageNum = IntVar()
@@ -580,7 +597,7 @@ class GTTrains:
         bagEntryBox = Spinbox(frame, from_= 0, to = 4, increment = 1, textvariable = self.baggageNum, state='readonly', font="TkDefaultFont 13")
         bagEntryBox.grid(row = 2, column =1)
 
-        bagInfo = Label(frame, text = "Every passenger can bring up to 4 baggage, 2 free of charge, 2 for $30 per bag")
+        bagInfo = Label(frame, text = "Passengers can bring 4 bags max (2 free of charge and 2 extra for $30 per bag)")
         bagInfo.grid(row=3, column=0, columnspan = 2)
 
         spaceLabel2 = Label(frame)
@@ -598,7 +615,7 @@ class GTTrains:
         nextB = Button(frame, text = "Next", command = self.updateFullList)
         nextB.grid(row =7 , column = 1, sticky=EW)
 
-        backB = Button(frame, text = "Back")
+        backB = Button(frame, text = "Back", command=self.back)
         backB.grid(row = 7, column = 0, sticky=EW)
 
         frame.pack()
@@ -618,8 +635,9 @@ class GTTrains:
         self.cardChosen = StringVar()
 
         self.travelInfo.withdraw()
-
         self.make1 = Toplevel()
+        self.make1.title("Make New Reservation")
+        self.winList.append(self.make1)
         frame = Frame(self.make1)
 
         title = Label(frame, text = "Make Reservation")
@@ -648,7 +666,7 @@ class GTTrains:
         cont = Button(frame, text = "Continue adding trains", command = self.addMore)
         cont.grid(row = 4, column = 0)
 
-        back = Button(frame, text = "Back")
+        back = Button(frame, text = "Back", command=self.back)
         back.grid(row = 5, column = 0, sticky=EW)
 
         next = Button(frame, text = "Submit", command = self.goToConfirmation)
@@ -818,6 +836,8 @@ class GTTrains:
     def updateReservation(self):
         self.funcScreen.withdraw()
         self.reserveView = Toplevel()
+        self.reserveView.title("Update Reservation")
+        self.winList.append(self.reserveView)
         frame = Frame(self.reserveView)
 
         self.idNum = StringVar()
@@ -834,6 +854,9 @@ class GTTrains:
         searchButton = Button(frame, text="Search", command=self.setReservationUpdate)
         searchButton.grid(row=1, column=2)
 
+        buttonBack = Button(frame, text="Back", command=self.funcBack)
+        buttonBack.grid(row=2, column=1) 
+
         frame.pack()
 
     def setReservationUpdate(self):
@@ -843,6 +866,8 @@ class GTTrains:
         self.cancelReservationID = StringVar()
         self.funcScreen.withdraw()
         self.cancelReservationWin = Toplevel()
+        self.cancelReservationWin.title("Cancel Reservation")
+        self.winList.append(self.cancelReservationWin)
         frame = Frame(self.cancelReservationWin)
 
         title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
@@ -857,12 +882,17 @@ class GTTrains:
         searchButton = Button(frame, text="Search", command=self.cancelReservationSearch)
         searchButton.grid(row=1, column=2)
 
+        buttonBack = Button(frame, text="Back", command=self.funcBack)
+        buttonBack.grid(row=2, column=1)
+
         frame.pack()
 
     def cancelReservationSearch(self):
         if True:
             self.cancelReservationWin.withdraw()
             self.cancelReservationWin2 = Toplevel()
+            self.cancelReservationWin2.title("Cancel Reservation")
+            self.winList.append(self.cancelReservationWin2)
 
             self.cancelTotalCost = StringVar()
             self.cancelDate = StringVar()
@@ -906,12 +936,10 @@ class GTTrains:
 
             for key in trainsDict:
                 temp = Label(frame, text=key)
-                print(key)
                 temp.grid(row=rowCount, column=colCount)
                 colCount = colCount + 1
                 items = trainsDict.get(key)
                 for i in range(len(trainsDict.get(key))):
-                    print(items[i])
                     temp1 = Label(frame, text=items[i])
                     temp1.grid(row=rowCount, column=colCount)
                     colCount = colCount + 1
@@ -936,7 +964,7 @@ class GTTrains:
             entry10 = Entry(frame, textvariable=self.cancelRefund)
             entry10.grid(row=rowCount + 3, column=1)
 
-            buttonBack = Button(frame, text="Back", command=self.back)
+            buttonBack = Button(frame, text="Back", command=self.funcBack)
             buttonBack.grid(row=rowCount + 4, column=0, stick=EW)
 
             submitCancelB = Button(frame, text="Submit", command=None)
@@ -951,6 +979,8 @@ class GTTrains:
     def giveReview(self):
         self.funcScreen.withdraw()
         self.reviewWin = Toplevel()
+        self.reviewWin.title("Give Review")
+        self.winList.append(self.reviewWin)
         frame = Frame(self.reviewWin)
 
         self.trainNumber = StringVar()
@@ -982,7 +1012,10 @@ class GTTrains:
         commentBoxEntry.grid(row=3, column=1)
 
         subReview = Button(frame, text="Submit", command=self.submitReview)
-        subReview.grid(row=4, column=0, columnspan=2)
+        subReview.grid(row=4, column=1, stick=EW)
+
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=4, column=0, sticky=EW)
 
         frame.pack()
 
@@ -1018,6 +1051,8 @@ class GTTrains:
         self.trainName = StringVar()
         self.funcScreen.withdraw()
         self.viewReviewWin = Toplevel()
+        self.viewReviewWin.title("View Review")
+        self.winList.append(self.viewReviewWin)
         frame = Frame(self.viewReviewWin)
 
         title = Label(frame, text="View Review", fg="Blue", font="TkDefaultFont 24 bold")
@@ -1032,7 +1067,7 @@ class GTTrains:
         nextButton = Button(frame, text="Next", command=self.viewReviewNext)
         nextButton.grid(row=2, column=1, sticky=EW)
 
-        backB = Button(frame, text="Back", command=self.back)
+        backB = Button(frame, text="Back", command=self.funcBack)
         backB.grid(row=2, column=0, sticky=EW)
 
         frame.pack()
@@ -1064,8 +1099,11 @@ class GTTrains:
         for x in range(len(reviews)):
             reviewDict.append([ratingDict.get(reviews[x][1]), reviews[x][0]])
 
-        self.viewReviewWin.destroy()
+        self.viewReviewWin.withdraw()
         self.viewReviewWin2 = Toplevel()
+        self.viewReviewWin2.title("View Review")
+        self.winList.append(self.viewReviewWin2)
+
         frame = Frame(self.viewReviewWin2)
 
         title = Label(frame, text="View Review", fg="Blue", font="TkDefaultFont 24 bold")
@@ -1092,7 +1130,7 @@ class GTTrains:
             colCount = 0
             rowCount = rowCount + 1
 
-        backB = Button(frame, text="Back", command=self.back)
+        backB = Button(frame, text="Back", command=self.funcBack)
         backB.grid(row=rowCount + 1, column=1, sticky=EW)
 
         frame.pack()
@@ -1100,6 +1138,8 @@ class GTTrains:
     def addInformation(self):
         self.funcScreen.withdraw()
         self.addInfo = Toplevel()
+        self.winList.append(self.addInfo)
+        self.addInfo.title("Get Student Discount")
         frame = Frame(self.addInfo)
 
         self.schoolEmail = StringVar()
@@ -1116,7 +1156,7 @@ class GTTrains:
         schoolReq = Label(frame, text="Your school email address ends with .edu")
         schoolReq.grid(row=2, column=0, columnspan=2)
 
-        backEmail = Button(frame, text="Back", command=self.back)
+        backEmail = Button(frame, text="Back", command=self.funcBack)
         backEmail.grid(row=3, column=0, sticky=EW)
 
         submitEmail = Button(frame, text="Submit", command=self.addStudentInfo)
@@ -1140,10 +1180,6 @@ class GTTrains:
             messagebox.showerror("Invalid Email", "Please enter a .edu email address")
             return
 
-
-    def cancel(self):
-        print("hi")
-
     def viewRevenueReport(self):
         print("hi")
 
@@ -1160,8 +1196,24 @@ class GTTrains:
         self.password.set("")
         self.userstate = None
 
+    def funcBack(self):
+        for window in self.winList[1:]:
+            window.destroy()
+            self.winList.remove(window)
+        self.winList[0].deiconify()
+
     def back(self):
-        print("if only")
+        try:
+            if(self.winList[-1]==self.travelInfo):
+                del self.fullTrainList[-1]
+                self.winList[-1].destroy()
+                self.winList.remove(self.winList[-1])
+                self.winList[-1].deiconify()
+                return
+        except:
+            self.winList[-1].destroy()
+            self.winList.remove(self.winList[-1])
+            self.winList[-1].deiconify()
 
     def Connect(self):
         try:
