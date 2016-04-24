@@ -14,6 +14,7 @@ class GTTrains:
                                 "04" : "April", "05" : "May", "06" : "June",
                                 "07" : "July", "08" : "August", "09" : "September",
                                 "10" : "October", "11" : "November", "12" : "December"}
+
         self.win = win
         self.image = PhotoImage(file="Buzz.gif")
         self.canvas = Canvas(self.win, width=100, height=100)
@@ -639,9 +640,12 @@ class GTTrains:
         self.makeReservation()
 
     def makeReservation(self):
+        data = self.Connect()
+        cursor = data.cursor()
+
+        flag = self.isStudent()
         cost = IntVar()
-        # cost.set(99)
-        cost.set(self.calcCost())
+        cost.set(self.calcCost(flag))
         self.cardChosen = StringVar()
 
         try:
@@ -654,8 +658,6 @@ class GTTrains:
         self.winList.append(self.make1)
         frame = Frame(self.make1)
 
-        data = self.Connect()
-        cursor = data.cursor()
         query ="SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
         self.datalist1 = cursor.execute(query)
         self.datalist1 = cursor.fetchall()
@@ -671,11 +673,16 @@ class GTTrains:
         for item in range(len(self.cardList)):
             self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
 
+        discLabel = ""
+        if (flag):
+            discLabel = "Student Discount Added!"
+        else:
+            discLabel = "No discount added :("
 
         title = Label(frame, text = "Make Reservation")
         title.grid(row = 0, column = 0, columnspan = 2)
 
-        discountLabel = Label(frame, text = "Discount or nah")
+        discountLabel = Label(frame, text = discLabel)
         discountLabel.grid(row = 1, column = 0, sticky = EW)
 
         cLabel = Label(frame, text = "Total cost")
@@ -950,7 +957,17 @@ class GTTrains:
         self.makeReservation()
 
 
-    def calcCost(self):
+    def calcCost(self, flag):
+        db = self.Connect()
+        cursor = db.cursor()
+
+        sql = "SELECT Student_Discount FROM System_Info"
+        r = cursor.execute(sql)
+        disc = cursor.fetchone()[0]
+
+        cursor.close()
+        db.close()
+
         cost = 0
 
         for items in self.fullTrainList:
@@ -958,7 +975,28 @@ class GTTrains:
                 cost = cost + (30 * (items[8] - 2))
             cost = cost + items[5]
 
+        if (flag):
+            cost = float(cost) * float(disc)
+
         return(cost)
+
+    def isStudent(self):
+        data = self.Connect()
+        cursor = data.cursor()
+
+        sql = "SELECT Is_Student FROM Customer WHERE Username  = '{}'".format(self.username.get())
+        r = cursor.execute(sql)
+
+        flag = cursor.fetchone()
+        print(flag)
+
+        data.close()
+        cursor.close()
+
+        if (flag[0] == 1):
+            return (True)
+
+        return(False)
 
     def goToConfirmation(self):
         self.make1.withdraw()
@@ -967,9 +1005,10 @@ class GTTrains:
 
         cursor = data.cursor()
 
-        finalCost = self.calcCost()
+        flag = self.isStudent()
+        finalCost = self.calcCost(flag)
 
-        sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')".format(0, self.username.get(), "123", finalCost)
+        sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')".format(0, self.username.get(), self.fullCardList[self.cardChosen.get()], finalCost)
         cursor.execute(sql)
         data.commit()
 
