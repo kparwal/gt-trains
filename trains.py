@@ -771,7 +771,158 @@ class GTTrains:
         self.makeNewReservation()
 
     def addCardScreen(self):
-        pass
+        self.make1.withdraw()
+        self.addCards = Toplevel()
+        frame = Frame(self.addCards)
+
+        self.cardName = StringVar()
+        self.cardNum = IntVar()
+        self.cvv = IntVar()
+        self.expDate = StringVar()
+        self.cardChosen1 = StringVar()
+
+        data = self.Connect()
+        cursor = data.cursor()
+        query ="SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
+        self.datalist1 = cursor.execute(query)
+        self.datalist1 = cursor.fetchall()
+        cursor.close()
+        data.close()
+
+        self.cardList=[]
+        for item in self.datalist1:
+            self.cardList.append(item[0])
+
+        
+
+        #newList=[]
+        #for item in self.cardList:
+        #    newList.append(item)
+        
+        #for num in range(len(self.cardList)):
+        #    self.cardList[num] = self.cardList[num][12:]
+
+        self.fullCardList={}
+        for item in range(len(self.cardList)):
+            self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
+
+        
+
+        title = Label(frame, text= "Payment Information", fg="Blue",font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=0, columnspan=5)
+
+        cardAdd = Label(frame, text = "Add Card", font= "TkDefaultFont 13")
+        cardAdd.grid(row=1, column=0)
+
+        cardName = Label(frame, text = "Name on Card")
+        cardName.grid(row=2, column=0)
+
+        cardNameEntry = Entry(frame, textvariable = self.cardName)
+        cardNameEntry.grid(row=2, column=1)
+
+        cardNum = Label(frame, text= "Card Number")
+        cardNum.grid(row=3, column=0)
+
+        cardNumEntry = Entry(frame, textvariable = self.cardNum)
+        cardNumEntry.grid(row=3, column=1)
+
+        cvv = Label(frame, text="CVV")
+        cvv.grid(row=4, column=0)
+
+        cvvEntry = Entry(frame, textvariable = self.cvv)
+        cvvEntry.grid(row=4, column=1)
+
+        expDate = Label(frame, text="Expiration Date (YYYY-MM)")
+        expDate.grid(row=5, column=0)
+
+        expDateEntry = Entry(frame, textvariable = self.expDate)
+        expDateEntry.grid(row=5, column=1)
+
+        spaceLabel = Label(frame)
+        spaceLabel.grid(row=6, column=0)
+
+        submitButton = Button(frame, text = "Submit", command = self.submitCard)
+        submitButton.grid(row = 7, column = 0, columnspan=2)
+
+        middleSpace = Label(frame)
+        middleSpace.grid(row=1, column=2, rowspan=6)
+
+        cardDelete = Label(frame, text = "Delete Card", font= "TkDefaultFont 13")
+        cardDelete.grid(row=1, column=3)
+
+        cardNum2 = Label(frame, text= "Card Number")
+        cardNum2.grid(row=2, column=3)
+
+        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen1)
+        cardBox['values'] = list(self.fullCardList.keys())
+        cardBox.grid(row = 2, column = 4)
+
+        spaceLabel2 = Label(frame)
+        spaceLabel2.grid(row=3, column=0, columnspan=2, rowspan=4)
+
+        submitButton2 = Button(frame, text = "Submit", command = self.removeCard)
+        submitButton2.grid(row = 7, column = 3, columnspan=2)
+
+       
+
+        #print(datalist)
+
+        
+        frame.pack()
+        
+
+        
+    def submitCard(self):
+        #pass
+        self.expireDate = self.expDate.get()
+        self.expireDate = self.expireDate.split('-')
+        self.expireDate = datetime.date(int(self.expireDate[0]), int(self.expireDate[1]), 1)
+
+
+
+        self.cardInfos = [self.cardName, self.cardNum, self.cvv, self.expDate]
+
+
+        for item in self.cardInfos:
+            if item.get() == "":
+                messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
+                return
+
+        if (self.expireDate < datetime.date.today()):
+            messagebox.showerror("Invalid Input", "Expiration Date Must Be Greater Than Today")
+            return
+        
+
+        data = self.Connect()
+        cursor = data.cursor()
+        query ="INSERT INTO Payment_Info (Card_Num,CVV,Exp_Date,Name_on_card,C_Username) VALUES ('{}','{}','{}','{}','{}')".format(self.cardNum.get(),self.cvv.get(),self.expireDate,self.cardName.get(),self.username.get())
+        cursor.execute(query)
+        data.commit()
+        cursor.close()
+        data.close()
+
+        messagebox.showinfo("Success!", "Your Card was Added")
+
+        self.addCards.withdraw()
+        self.make1.deiconify()
+
+        
+
+    def removeCard(self):
+        cardSelect = self.fullCardList[self.cardChosen1.get()]
+
+        data = self.Connect()
+        cursor = data.cursor()
+        query ="DELETE FROM Payment_Info WHERE Card_Num = '{}'".format(cardSelect)
+        cursor.execute(query)
+        data.commit()
+        cursor.close()
+        data.close()
+
+        messagebox.showinfo("Success!", "Your Card was Removed")
+        
+        #print(cardSelect)
+        #print(self.fullCardList)   
 
     def calcCost(self):
         cost = 0
