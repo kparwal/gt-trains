@@ -407,12 +407,12 @@ class GTTrains:
 
         frame.pack()
 
-    def parseDate(self):
+    def parseDate(self, userDate):
         try:
-            userDate = self.departDate.get()
+            # userDate = self.departDate.get()
             userDate = userDate.split('-')
 
-            userDate = datetime.datetime(int(userDate[0]), int(userDate[1]), int(userDate[2]))
+            userDate = datetime.date(int(userDate[0]), int(userDate[1]), int(userDate[2]))
 
             return(userDate)
         except:
@@ -428,7 +428,7 @@ class GTTrains:
                 messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
                 return
 
-        userDate = self.parseDate()
+        userDate = self.parseDate(self.departDate.get())
         try:
             if (userDate < datetime.datetime.today()):
                 messagebox.showerror("Incorrect Date", "Please enter future date.")
@@ -463,7 +463,8 @@ class GTTrains:
                 WHERE `Location` = '{}'
                 AND `Arrival_Time` IS NOT NULL
                 ORDER BY `Location` ASC
-                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number`) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
+                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number` WHERE `A`.`Station_Name` != `B`.`Station_Name`
+                ) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
                 AS E INNER JOIN `Train_Route` AS F ON `E`.`Train_Number`=`F`.`Train_Number`
                 """.format(self.chosenDeparture.get(), self.chosenArrival.get())
         cursor.execute(query)
@@ -471,7 +472,7 @@ class GTTrains:
         # datalist = cursor.fetchall()
         cursor.close()
         data.close()
-
+        # print("I am in the right filed")
         #  print(datalist)
         self.listofTrains = datalist
 
@@ -783,7 +784,7 @@ class GTTrains:
 
         data = self.Connect()
         cursor = data.cursor()
-        query ="SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
+        query = "SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
         self.datalist1 = cursor.execute(query)
         self.datalist1 = cursor.fetchall()
         cursor.close()
@@ -961,7 +962,7 @@ class GTTrains:
             cursor.execute(fetchNumber)
             num = cursor.fetchall()[0][0]
             insert = "INSERT INTO `Reserve_Train` (`ReservationID`, `Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`, `Num_Baggage`) VALUES ('{}'," \
-                     "'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')".format(aList, self.username.get(), lists[-2], str(lists[3]), lists[6], lists[1], lists[2], num, lists[-1])
+                     "'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')".format(aList, self.username.get(), lists[-2], self.departDate, lists[6], lists[1], lists[2], num, lists[-1])
             cursor.execute(insert)
             data.commit()
 
@@ -1050,30 +1051,67 @@ class GTTrains:
             self.cancelRefund = StringVar()
 
             frame = Frame(self.cancelReservationWin2)
-            trainsDict = {
-                "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
-                "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
-            }
+            # trainsDict = {
+            #     "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
+            #     "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
+            # }
+            data = self.Connect()
+            cursor = data.cursor()
 
+            search_sql = """
+                            SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost` FROM (
+                            SELECT * FROM
+                            	(SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                            AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
+                         """.format(self.cancelReservationID.get(), self.username.get())
+            cursor.execute(search_sql)
+            searchlist = self.nested_tuple_to_list(cursor.fetchall(), False)
+            cursor.close()
+            data.close()
+            # print(searchlist)
+            trainsDict = {}
+            if len(searchlist) == 0:
+                messagebox.showerror("Error", "Enter a valid Reservation ID")
+                self.cancelReservationWin2.withdraw()
+                self.cancelReservation()
+            days_before = 9 ** 9
+            refund_percentage = 0.0
+            for result in searchlist:
+                date = self.parseDate(result[1])
+                advance = int(str(date - datetime.date.today()).split(' ')[0])
+                if advance < days_before:
+                    days_before = advance
+                trainsDict[result[0]] = result[1:8]
+                self.cancelTotalCost = str(result[8])
+            if days_before<= 0:
+                messagebox.showerror("Error", "Too late to cancel!")
+                self.cancelReservationWin2.withdraw()
+                self.cancelReservation()
+            elif days_before < 7 and days_before >=1:
+                refund_percentage = .5
+            else:
+                refund_percentage = .8
+            print(days_before)
+            self.cancelRefund = str(round(refund_percentage * round(float(self.cancelTotalCost)) - 50, 2))
             title = Label(frame, text="Cancel Reservation", fg="Blue", font="TkDefaultFont 24 bold")
             title.grid(row=0, column=3, columnspan=2)
 
             label = Label(frame, text="Train \n (Train Number)")
             label.grid(row=1, column=0)
 
-            label1 = Label(frame, text="Time \n (Duration)")
+            label1 = Label(frame, text="Departure Date")
             label1.grid(row=1, column=1)
 
-            label2 = Label(frame, text="Departs From")
+            label2 = Label(frame, text="Departure Time")
             label2.grid(row=1, column=2)
 
-            label3 = Label(frame, text="Arrives At")
+            label3 = Label(frame, text="Departs From")
             label3.grid(row=1, column=3)
 
-            label4 = Label(frame, text="Class")
+            label4 = Label(frame, text="Arrives At")
             label4.grid(row=1, column=4)
 
-            label5 = Label(frame, text="Price")
+            label5 = Label(frame, text="Class")
             label5.grid(row=1, column=5)
 
             label6 = Label(frame, text="# of Baggages")
@@ -1100,32 +1138,49 @@ class GTTrains:
             label8 = Label(frame, text="Total Cost of Reservation")
             label8.grid(row=rowCount + 1, column=0, sticky=W)
 
-            entry8 = Entry(frame, textvariable=self.cancelTotalCost)
+            entry8 = Label(frame, text=self.cancelTotalCost)
             entry8.grid(row=rowCount + 1, column=1)
 
             label9 = Label(frame, text="Date of Cancellation")
             label9.grid(row=rowCount + 2, column=0, sticky=W)
 
-            entry9 = Entry(frame, textvariable=self.cancelDate)
+            entry9 = Label(frame, text=str(datetime.date.today()))
             entry9.grid(row=rowCount + 2, column=1)
 
             label10 = Label(frame, text="Amount to be Refunded")
             label10.grid(row=rowCount + 3, column=0, sticky=W)
 
-            entry10 = Entry(frame, textvariable=self.cancelRefund)
+            entry10 = Label(frame, text=self.cancelRefund)
             entry10.grid(row=rowCount + 3, column=1)
 
-            buttonBack = Button(frame, text="Back", command=self.funcBack)
-            buttonBack.grid(row=rowCount + 4, column=0, stick=EW)
+            label11 = Label(frame, text="Refund Percent")
+            label11.grid(row=rowCount + 4, column=0, sticky=W)
 
-            submitCancelB = Button(frame, text="Submit", command=None)
-            submitCancelB.grid(row=rowCount + 4, column=1, sticky=EW)
+            entry11 = Label(frame, text=str(refund_percentage))
+            entry11.grid(row=rowCount + 4, column=1)
+
+            buttonBack = Button(frame, text="Back", command=self.funcBack)
+            buttonBack.grid(row=rowCount + 5, column=0, stick=EW)
+
+            submitCancelB = Button(frame, text="Submit", command=self.setCancelled)
+            submitCancelB.grid(row=rowCount + 5, column=1, sticky=EW)
 
             frame.pack()
 
         else:
             messagebox.showerror("Error", "Enter the correct ReservationID")
             return
+
+    def setCancelled(self):
+        data = self.Connect()
+        cursor = data.cursor()
+        query =  "UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = '1' WHERE `Reservation`.`ReservationID` = {}".format(self.cancelReservationID.get())
+        cursor.execute(query)
+        data.commit()
+        cursor.close()
+        data.close()
+        messagebox.showinfo("Success", "Successfully cancelled reservation!")
+        self.funcBack()
 
     def giveReview(self):
         self.funcScreen.withdraw()
