@@ -427,15 +427,16 @@ class GTTrains:
 
 
     def findTrains(self):
+        for item in temp:
+            if item.get() == "":
+                messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
+                return
+
         if (self.chosenDeparture.get() == self.chosenArrival.get()):
             messagebox.showerror("Invalid Entry", "Cannot have the same arrival and departure stations")
             return
 
         temp = [self.chosenDeparture,self.chosenArrival,self.departDate]
-        for item in temp:
-            if item.get() == "":
-                messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
-                return
 
         self.userDate = self.parseDate(self.departDate.get())
         try:
@@ -1109,16 +1110,31 @@ class GTTrains:
         frame.pack()
 
     def setReservationUpdate(self):
-        
-        
+
+
 
         data = self.Connect()
         cursor = data.cursor()
-      
+
+        sql = "SELECT ReservationID FROM Reservation WHERE Is_Cancelled='0'"
+        cursor.execute(sql)
+
+        aList = self.nested_tuple_to_list(cursor.fetchall(), True)
+
+        try:
+            b = int(self.idNum.get())
+        except:
+            messagebox.showerror("Error", "ReservationID not valid")
+            return
+
+        if (int(self.idNum.get()) not in aList):
+            messagebox.showerror("Error", "ReservationID does not exist")
+            return
+
         search_sql = """
                             SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost`, `Arrival_Time` FROM (
                             SELECT * FROM
-                            	(SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                                (SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
                             AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
                          """.format(self.idNum.get(), self.username.get())
         cursor.execute(search_sql)
@@ -1137,7 +1153,7 @@ class GTTrains:
         self.reserveUpdate.title("Update Reservation")
         self.winList.append(self.reserveUpdate)
         frame=Frame(self.reserveUpdate)
-            
+
 
         title = Label(frame, text="Update Reservation", fg="Blue", font="TkDefaultFont 24 bold")
         title.grid(row=0, column=0, columnspan=7)
@@ -1146,7 +1162,7 @@ class GTTrains:
         label1 = Label(frame, text = "Train")
         label1.grid(row = 1, column = 0)
 
-        label2 = Label(frame, text = "Time (Duration)")
+        label2 = Label(frame, text = "Date")
         label2.grid(row = 1, column = 1)
 
         label3 = Label(frame, text = "Departs from")
@@ -1218,11 +1234,11 @@ class GTTrains:
         buttonBack = Button(frame, text="Back", command=self.back)
         buttonBack.grid(row=99, column=1)
 
-        
+
 
         frame.pack()
-        
-        
+
+
 
     def submitUpdate(self):
         self.reserveUpdate.withdraw()
@@ -1241,11 +1257,11 @@ class GTTrains:
 
         spaceLabel = Label(self.frame9)
         spaceLabel.grid(row=2, column=0)
-        
+
         label1 = Label(self.frame9, text = "Train", font="TkDefaultFont 10 bold")
         label1.grid(row = 2, column = 1)
 
-        label2 = Label(self.frame9, text = "Time (Duration)", font="TkDefaultFont 10 bold")
+        label2 = Label(self.frame9, text = "Date", font="TkDefaultFont 10 bold")
         label2.grid(row = 2, column = 2)
 
         label3 = Label(self.frame9, text = "Departs from", font="TkDefaultFont 10 bold")
@@ -1272,11 +1288,11 @@ class GTTrains:
         label9 = Label(self.frame9, text = "New Departure Date\n(YYYY-MM-DD): ")
         label9.grid(row=20, column=1)
 
-        label9Entry = Entry(self.frame9, textvariable=self.newDateVar)
-        label9Entry.grid(row=20, column=2)
+        self.label9Entry = Entry(self.frame9, textvariable=self.newDateVar)
+        self.label9Entry.grid(row=20, column=2)
 
-        updateButton = Button(self.frame9, text="Update", command=self.showUpdate)
-        updateButton.grid(row=20, column=3)
+        self.updateButton1 = Button(self.frame9, text="Update", command=self.showUpdate)
+        self.updateButton1.grid(row=20, column=3)
 
         rowCount = 8
         colCount = 1
@@ -1318,27 +1334,40 @@ class GTTrains:
             colCount = 0
             rowCount = rowCount + 1
 
-        buttonBack = Button(self.frame9, text="Back", command=self.back)
+        buttonBack = Button(self.frame9, text="Back", command=self.funcBack)
         buttonBack.grid(row=999, column=1)
 
         self.frame9.pack()
-            
+
 
     def showUpdate(self):
-        
+
+
         ticketDate = self.parseDate(self.searchlist1[self.removeTracker.get()][1])
         #print(ticketDate - self.parseDate(self.newDateVar.get()))
+        try:
+            userDate = self.newDateVar.get().split('-')
+
+            userDate = datetime.date(int(userDate[0]), int(userDate[1]), int(userDate[2]))
+        except:
+            messagebox.showerror("Error", "Invalid Input")
+            return
+
         if (ticketDate - datetime.date.today() < datetime.timedelta(1)):
             messagebox.showerror("Error", "Update Must Be Made at Least 1 day Earlier than Departure Date")
             return
 
         if (self.parseDate(self.newDateVar.get()) - datetime.date.today() < datetime.timedelta(1)):
-            messagebox.showerror("Error", "Can't Update, TOO SOON")
+            messagebox.showerror("Error", "Updated Date Must be After Today's Date")
             return
 
         messagebox.showinfo("Success", "Date Updated")
-            
-            
+
+
+        self.label9Entry.configure(state='disabled')
+        self.updateButton1.configure(state='disabled')
+
+
         self.changeFeeVar = IntVar()
         self.changeFeeVar.set(50)
 
@@ -1348,32 +1377,32 @@ class GTTrains:
 
         tCost = cursor.execute(q)
         tCost = cursor.fetchall()[0][0]
-        
+
         self.upTotalCost = DoubleVar()
         totalCost = tCost + self.changeFeeVar.get()
         self.upTotalCost.set(totalCost)
-        
+
 
         updateTicketq = "UPDATE Reserve_Train SET Departure_Date = '{}' WHERE ReservationID = '{}'".format(self.newDateVar.get(), self.idNum.get())
         cursor.execute(updateTicketq)
 
         upTicketq = "UPDATE Reservation SET Total_Cost = '{}' WHERE ReservationID = '{}'".format(self.upTotalCost.get(), self.idNum.get())
         cursor.execute(upTicketq)
-        
-        
+
+
         data.commit()
         cursor.close()
         data.close()
 
 
-        
+
         spaceLabel = Label(self.frame9)
         spaceLabel.grid(row=22, column=0)
-        
+
         label1 = Label(self.frame9, text = "Train", font="TkDefaultFont 10 bold")
         label1.grid(row = 23, column = 1)
 
-        label2 = Label(self.frame9, text = "Time (Duration)", font="TkDefaultFont 10 bold")
+        label2 = Label(self.frame9, text = "Date", font="TkDefaultFont 10 bold")
         label2.grid(row = 23, column = 2)
 
         label3 = Label(self.frame9, text = "Departs from", font="TkDefaultFont 10 bold")
@@ -1405,7 +1434,7 @@ class GTTrains:
 
         spaceLab1 = Label(self.frame9)
         spaceLab1.grid(row=46, column=1)
-        
+
         label10 = Label(self.frame9, text = "Updated Total Cost")
         label10.grid(row=47, column=1)
 
@@ -1413,15 +1442,15 @@ class GTTrains:
         label10Entry.grid(row=47, column=2)
 
 
-        
 
-        
 
-            
+
+
+
         self.searchlist1[self.removeTracker.get()][1] = self.parseDate(self.newDateVar.get())
 
         self.searchlist1[self.removeTracker.get()][8] = self.upTotalCost.get()
-        
+
         rowCount = 24
         colCount = 1
         newList=[1]
@@ -1462,7 +1491,7 @@ class GTTrains:
             colCount = 0
             rowCount = rowCount + 1
 
-        
+
 
         self.frame9.pack()
 
@@ -1499,6 +1528,12 @@ class GTTrains:
         cursor.execute(sql)
 
         aList = self.nested_tuple_to_list(cursor.fetchall(), True)
+
+        try:
+            b = int(self.cancelReservationID.get())
+        except:
+            messagebox.showerror("Error", "ReservationID not valid")
+            return
 
         if (int(self.cancelReservationID.get()) not in aList):
             messagebox.showerror("Error", "ReservationID does not exist")
