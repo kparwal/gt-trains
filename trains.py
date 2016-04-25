@@ -1529,10 +1529,10 @@ class GTTrains:
         title.grid(row=0, column=0, columnspan=2)
 
         label = Label(frame, text="Month", font="TkDefaultFont 16 bold")
-        label.grid(row=1, column=0, sticky=W)
+        label.grid(row=1, column=0, sticky=EW)
 
         label1 = Label(frame, text="Revenue", font="TkDefaultFont 16 bold")
-        label1.grid(row=1, column=1, sticky=W)
+        label1.grid(row=1, column=1, sticky=EW)
 
         rowCount = 2
         colCount = 0
@@ -1542,11 +1542,11 @@ class GTTrains:
 
         for lists in revDict:
             temp = Label(frame, text=lists[0])
-            temp.grid(row=rowCount, column=colCount, sticky=W)
+            temp.grid(row=rowCount, column=colCount, sticky=EW)
             colCount = colCount + 1
 
             temp = Label(frame, text=lists[1])
-            temp.grid(row=rowCount, column=colCount, sticky=W)
+            temp.grid(row=rowCount, column=colCount, sticky=EW)
             colCount = colCount + 1
 
             colCount = 0
@@ -1613,6 +1613,12 @@ class GTTrains:
             else:
                 monthcounter = 1
                 month = data[0]
+
+        for x in range(len(revDict)):
+            if month == revDict[x][0]:
+                revDict[x][0]=""
+            else:
+                month = revDict[x][0]
 
         rowCount = 2
         colCount = 0
