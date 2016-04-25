@@ -720,7 +720,7 @@ class GTTrains:
         cont = Button(frame, text = "Continue adding trains", command = self.addMore)
         cont.grid(row = 4, column = 0)
 
-        back = Button(frame, text = "Back", command=self.back)
+        back = Button(frame, text = "Back", command=self.backSpecial)
         back.grid(row = 5, column = 0, sticky=EW)
 
         next = Button(frame, text = "Submit", command = self.goToConfirmation)
@@ -2064,6 +2064,13 @@ class GTTrains:
         self.password.set("")
         self.winList = []
         self.userstate = None
+
+    def backSpecial(self):
+        self.winList[-1].destroy()
+        self.winList.remove(self.winList[-1])
+        self.winList[-1].deiconify()
+        self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
+        self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-2])
 
     def funcBack(self):
         for window in self.winList[1:]:
