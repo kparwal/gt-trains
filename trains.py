@@ -364,7 +364,7 @@ class GTTrains:
         try:
             self.funcScreen.withdraw()
         except:
-            print("WHAT DO YOU MEAN WHEN YOU NOD YOUR HEAD YES")
+            print("Error")
 
         self.searchTrains = Toplevel()
         self.searchTrains.title("Make New Reservation")
@@ -427,6 +427,9 @@ class GTTrains:
 
 
     def findTrains(self):
+        temp = [self.chosenDeparture,self.chosenArrival,self.departDate]
+
+
         for item in temp:
             if item.get() == "":
                 messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
@@ -435,8 +438,6 @@ class GTTrains:
         if (self.chosenDeparture.get() == self.chosenArrival.get()):
             messagebox.showerror("Invalid Entry", "Cannot have the same arrival and departure stations")
             return
-
-        temp = [self.chosenDeparture,self.chosenArrival,self.departDate]
 
         self.userDate = self.parseDate(self.departDate.get())
         try:
