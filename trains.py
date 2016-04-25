@@ -904,30 +904,53 @@ class GTTrains:
         frame.pack()
 
     def submitCard(self):
-        self.expireDate = self.expDate.get()
-        self.expireDate = self.expireDate.split('-')
-        self.expireDate = datetime.date(int(self.expireDate[0]), int(self.expireDate[1]), 1)
+        data = self.Connect()
+        cursor = data.cursor()
+        query ="SELECT Card_NUM FROM Payment_Info WHERE Card_Num = '{}'".format(self.cardNum.get())
+        cursor.execute(query)
+        card = cursor.fetchone()
+        cursor.close()
+        data.close()
 
         self.cardInfos = [self.cardName, self.cardNum, self.cvv, self.expDate]
-
         for item in self.cardInfos:
             if item.get() == "":
                 messagebox.showerror("Invalid Input", "All Fields Must Be Filled")
                 return
 
+        try:
+            self.expireDate = self.expDate.get()
+            self.expireDate = self.expireDate.split('-')
+            self.expireDate = datetime.date(int(self.expireDate[0]), int(self.expireDate[1]), 1)
+        except:
+            messagebox.showerror("Incorrect Date", "Please enter date in correct format.")
+            return
+
+        if not(len(self.cvv.get())==3):
+            messagebox.showerror("Incorrect Format", "Please enter a 3 digit CVV.")
+            return
+
+        if not(len(self.cardNum.get())==16):
+            messagebox.showerror("Incorrect Format", "Please enter a 16 digit card number.")
+            return
+
         if (self.expireDate < datetime.date.today()):
             messagebox.showerror("Invalid Input", "Expiration Date Must Be Greater Than Today")
             return
 
-        data = self.Connect()
-        cursor = data.cursor()
-        query ="INSERT INTO Payment_Info (Card_Num,CVV,Exp_Date,Name_on_card,C_Username) VALUES ('{}','{}','{}','{}','{}')".format(self.cardNum.get(),self.cvv.get(),self.expireDate,self.cardName.get(),self.username.get())
-        cursor.execute(query)
-        data.commit()
-        cursor.close()
-        data.close()
+        if(card==() or card==None):
+            data = self.Connect()
+            cursor = data.cursor()
+            query ="INSERT INTO Payment_Info (Card_Num,CVV,Exp_Date,Name_on_card,C_Username) VALUES ('{}','{}','{}','{}','{}')".format(self.cardNum.get(),self.cvv.get(),self.expireDate,self.cardName.get(),self.username.get())
+            cursor.execute(query)
+            data.commit()
+            cursor.close()
+            data.close()
 
-        messagebox.showinfo("Success!", "Your Card was Added")
+            messagebox.showinfo("Success!", "Your Card was Added")
+        else:
+            messagebox.showerror("Card in Use", "Please enter a new 16 digit card.")
+            return
 
         self.addCards.withdraw()
         #self.make1.deiconify()
