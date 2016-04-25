@@ -1541,7 +1541,85 @@ class GTTrains:
         frame.pack()
 
     def viewPopularRouteReport(self):
-        print("hi")
+        self.funcScreenManager.withdraw()
+        self.viewPopularRouteWin = Toplevel()
+        self.winList.append(self.viewPopularRouteWin)
+        self.viewPopularRouteWin.title("Popular Route Report")
+        revDict = []
+        data = self.Connect()
+        cursor = data.cursor()
+        query = """
+                    SELECT MONTH(Departure_Date) AS 
+                    MONTH , Train_Name.Name, COUNT( Reserve_Train.ReservationID ) AS Number
+                    FROM Reservation
+                    JOIN Reserve_Train ON Reservation.`ReservationID` = Reserve_Train.`ReservationID` 
+                    JOIN Train_Name ON Train_Name.Train_Number = Reserve_Train.Train_Number
+                    WHERE  `Departure_Date` 
+                    BETWEEN DATE_FORMAT( NOW( ) - INTERVAL 3 
+                    MONTH ,  '%Y-%m-01 00:00:00' ) 
+                    AND DATE_FORMAT( LAST_DAY( NOW( ) - INTERVAL 1 
+                    MONTH ) ,  '%Y-%m-%d 23:59:59' ) 
+                    AND  `Is_Cancelled` =0
+                    GROUP BY MONTH , Train_Name.Name
+                    ORDER BY MONTH , Number DESC, Train_Name.Name"""
+        cursor.execute(query)
+        datalist = cursor.fetchall()
+        cursor.close()
+        data.close()
+        frame = Frame(self.viewPopularRouteWin)
+
+        title = Label(frame, text="View Popular Route Report", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=1)
+
+        label = Label(frame, text="Month", font="TkDefaultFont 16 bold")
+        label.grid(row=1, column=0, sticky=EW)
+
+        label1 = Label(frame, text="Train Number", font="TkDefaultFont 16 bold")
+        label1.grid(row=1, column=1, sticky=EW)
+
+        label1 = Label(frame, text="# of Reservations", font="TkDefaultFont 16 bold")
+        label1.grid(row=1, column=2, sticky=EW)
+
+        for data in datalist:
+            revDict.append([datetime.date(1900, data[0], 1).strftime('%B'),data[1],data[2]])
+
+        monthcounter = 0
+        month = ""
+        for data in revDict:
+            if month == data[0]:
+                monthcounter += 1
+                if monthcounter>2:
+                    revDict.remove(data)
+            else:
+                monthcounter = 1
+                month = data[0]
+
+        rowCount = 2
+        colCount = 0
+
+        for lists in revDict:
+            temp = Label(frame, text=lists[0])
+            temp.grid(row=rowCount, column=colCount, sticky=EW)
+            colCount = colCount + 1
+
+            temp = Label(frame, text=lists[1])
+            temp.grid(row=rowCount, column=colCount, sticky=EW)
+            colCount = colCount + 1
+
+            temp = Label(frame, text=lists[2])
+            temp.grid(row=rowCount, column=colCount, sticky=EW)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+        space = Label(frame)
+        space.grid(row=rowCount + 1, column=0, sticky=W)
+
+        backB = Button(frame, text="Back", command=self.funcBack)
+        backB.grid(row=rowCount + 2, column=0, sticky=W)
+
+        frame.pack()
 
     def logout(self):
         if self.userstate == 0:
