@@ -841,8 +841,8 @@ class GTTrains:
         frame = Frame(self.addCards)
 
         self.cardName = StringVar()
-        self.cardNum = IntVar()
-        self.cvv = IntVar()
+        self.cardNum = StringVar()
+        self.cvv = StringVar()
         self.expDate = StringVar()
         self.cardChosen1 = StringVar()
 
@@ -1146,8 +1146,6 @@ class GTTrains:
         self.searchlist1 = self.nested_tuple_to_list(cursor.fetchall(), False)
         cursor.close()
         data.close()
-
-        print(self.searchlist1)
 
         if len(self.searchlist1) == 0:
             messagebox.showerror("Error", "Please Enter a Valid Reservation ID")
