@@ -656,7 +656,9 @@ class GTTrains:
 
         flag = self.isStudent()
         cost = IntVar()
-        cost.set(self.calcCost(flag))
+        c = "{0:.2f}".format(self.calcCost(flag))
+
+        cost.set(c)
         self.cardChosen = StringVar()
 
         try:
