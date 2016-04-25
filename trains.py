@@ -843,27 +843,6 @@ class GTTrains:
         self.expDate = StringVar()
         self.cardChosen1 = StringVar()
 
-        """
-        data = self.Connect()
-        cursor = data.cursor()
-        query = "SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
-        self.datalist1 = cursor.execute(query)
-        self.datalist1 = cursor.fetchall()
-        cursor.close()
-        data.close()
-
-        self.cardList=[]
-        for item in self.datalist1:
-            self.cardList.append(item[0])
-
-
-        self.fullCardList={}
-        for item in range(len(self.cardList)):
-            self.fullCardList[self.cardList[item][12:]] = self.cardList[item]
-        """
-
-
-
         title = Label(frame, text= "Payment Information", fg="Blue",font="TkDefaultFont 24 bold")
         title.grid(row=0, column=0, columnspan=5)
 
