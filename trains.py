@@ -925,11 +925,20 @@ class GTTrains:
         except:
             messagebox.showerror("Incorrect Date", "Please enter date in correct format.")
             return
+        try:
+            int(self.cvv.get())
+        except:
+            messagebox.showerror("Incorrect Format", "Please enter a 3 digit CVV.")
+            return
 
         if not(len(self.cvv.get())==3):
             messagebox.showerror("Incorrect Format", "Please enter a 3 digit CVV.")
             return
-
+        try:
+            int(self.cardNum.get())
+        except:
+            messagebox.showerror("Incorrect Format", "Please enter a 16 digit card number.")
+            return
         if not(len(self.cardNum.get())==16):
             messagebox.showerror("Incorrect Format", "Please enter a 16 digit card number.")
             return
