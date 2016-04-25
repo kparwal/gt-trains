@@ -1038,7 +1038,6 @@ class GTTrains:
         return(False)
 
     def goToConfirmation(self):
-        self.make1.withdraw()
 
         data = self.Connect()
 
@@ -1047,9 +1046,15 @@ class GTTrains:
         flag = self.isStudent()
         finalCost = self.calcCost(flag)
 
+        if self.cardChosen.get()=="Select Card Number":
+            messagebox.showerror("Failed!", "Choose a card please")
+            return
+
         if(len(self.fullTrainList) == 0):
             messagebox.showerror("Empty Reservation", "Cannot submit empty reservations!")
             self.funcBack()
+
+        self.make1.withdraw()
 
         sql = "INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')".format(0, self.username.get(), self.fullCardList[self.cardChosen.get()], finalCost)
         cursor.execute(sql)
