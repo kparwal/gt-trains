@@ -422,11 +422,15 @@ class GTTrains:
             return(userDate)
         except:
             messagebox.showerror("Incorrect Date", "Please enter date in correct format.")
-            return
+            return(False)
 
 
 
     def findTrains(self):
+        if (self.chosenDeparture.get() == self.chosenArrival.get()):
+            messagebox.showerror("Invalid Entry", "Cannot have the same arrival and departure stations")
+            return
+
         temp = [self.chosenDeparture,self.chosenArrival,self.departDate]
         for item in temp:
             if item.get() == "":
@@ -434,6 +438,11 @@ class GTTrains:
                 return
 
         self.userDate = self.parseDate(self.departDate.get())
+        try:
+            if (not self.userDate):
+                return
+        except:
+            pass
         self.dateForSQL = self.parseDate(self.departDate.get())
 
         try:
@@ -661,6 +670,7 @@ class GTTrains:
         query ="SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'".format(self.username.get())
         self.datalist1 = cursor.execute(query)
         self.datalist1 = cursor.fetchall()
+
         cursor.close()
         data.close()
 
@@ -695,8 +705,9 @@ class GTTrains:
         cardLabel = Label(frame, text = "Use Card")
         cardLabel.grid(row = 3, column = 0)
 
-        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen)
+        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen, state = 'readonly')
         cardBox['values'] = list(self.fullCardList.keys())
+        self.cardChosen.set("Select Card Number")
         cardBox.grid(row = 3, column = 1)
 
         addCardButton = Button(frame, text = "Add a card", command = self.addCardScreen)
@@ -897,7 +908,7 @@ class GTTrains:
         cardNum2 = Label(frame, text= "Card Number")
         cardNum2.grid(row=2, column=3)
 
-        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen1)
+        cardBox = ttk.Combobox(frame, textvariable = self.cardChosen1, state = 'readonly')
         cardBox['values'] = list(self.fullCardList.keys())
         cardBox.grid(row = 2, column = 4)
 
@@ -1002,7 +1013,6 @@ class GTTrains:
         r = cursor.execute(sql)
 
         flag = cursor.fetchone()
-        print(flag)
 
         data.close()
         cursor.close()
@@ -1040,7 +1050,6 @@ class GTTrains:
         aList = cursor.fetchall()[0][0]
 
         for lists in self.fullTrainList:
-            print(lists)
             fetchNumber = "SELECT `Train_Number` from `Train_Name` WHERE `Name` = '{}'".format(lists[0])
             cursor.execute(fetchNumber)
             num = cursor.fetchall()[0][0]
@@ -1128,6 +1137,18 @@ class GTTrains:
         frame.pack()
 
     def cancelReservationSearch(self):
+        data = self.Connect()
+        cursor = data.cursor()
+
+        sql = "SELECT ReservationID FROM Reservation WHERE Is_Cancelled='0'"
+        cursor.execute(sql)
+
+        aList = self.nested_tuple_to_list(cursor.fetchall(), True)
+
+        if (int(self.cancelReservationID.get()) not in aList):
+            messagebox.showerror("Error", "ReservationID does not exist")
+            return
+
         if (self.cancelReservationID.get()==""):
             messagebox.showerror("Error", "Enter a valid ReservationID")
             return
@@ -1146,8 +1167,7 @@ class GTTrains:
         #     "2163 Express": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"],
         #     "2543 Regional": ["3:30 a.m.", "Boston(BBY)", "New York(Penn)", "2nd Class", "$115", "3", "Alier Hu"]
         # }
-        data = self.Connect()
-        cursor = data.cursor()
+
 
         search_sql = """
                         SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost` FROM (
@@ -1159,7 +1179,7 @@ class GTTrains:
         searchlist = self.nested_tuple_to_list(cursor.fetchall(), False)
         cursor.close()
         data.close()
-        # print(searchlist)
+
         trainsDict = {}
         if len(searchlist) == 0:
             messagebox.showerror("Error", "Enter a valid Reservation ID")
@@ -1182,7 +1202,7 @@ class GTTrains:
             self.refund_percentage = .5
         else:
             self.refund_percentage = .8
-        print(days_before)
+
         self.cancelRefund = round(self.refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
         if self.cancelRefund < 0:
             self.cancelRefund = 0
@@ -1274,7 +1294,7 @@ class GTTrains:
         self.cancelRefund = round(refund_percentage * round(float(self.cancelTotalCost)) - 50, 2)
         refund_percentage *= 100
         self.cancelTotalCost = str(float(self.cancelTotalCost) - self.cancelRefund)
-        print(self.cancelTotalCost)
+
         data = self.Connect()
         cursor = data.cursor()
         query = "UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = 1, `Total_Cost` = {} WHERE `ReservationID` = {} AND `C_Username`='{}'".format(float(self.cancelTotalCost), self.cancelReservationID.get(), self.username.get())
@@ -1549,16 +1569,16 @@ class GTTrains:
         data = self.Connect()
         cursor = data.cursor()
         query = """
-                    SELECT MONTH(Departure_Date) AS 
+                    SELECT MONTH(Departure_Date) AS
                     MONTH , Train_Name.Name, COUNT( Reserve_Train.ReservationID ) AS Number
                     FROM Reservation
-                    JOIN Reserve_Train ON Reservation.`ReservationID` = Reserve_Train.`ReservationID` 
+                    JOIN Reserve_Train ON Reservation.`ReservationID` = Reserve_Train.`ReservationID`
                     JOIN Train_Name ON Train_Name.Train_Number = Reserve_Train.Train_Number
-                    WHERE  `Departure_Date` 
-                    BETWEEN DATE_FORMAT( NOW( ) - INTERVAL 3 
-                    MONTH ,  '%Y-%m-01 00:00:00' ) 
-                    AND DATE_FORMAT( LAST_DAY( NOW( ) - INTERVAL 1 
-                    MONTH ) ,  '%Y-%m-%d 23:59:59' ) 
+                    WHERE  `Departure_Date`
+                    BETWEEN DATE_FORMAT( NOW( ) - INTERVAL 3
+                    MONTH ,  '%Y-%m-01 00:00:00' )
+                    AND DATE_FORMAT( LAST_DAY( NOW( ) - INTERVAL 1
+                    MONTH ) ,  '%Y-%m-%d 23:59:59' )
                     AND  `Is_Cancelled` =0
                     GROUP BY MONTH , Train_Name.Name
                     ORDER BY MONTH , Number DESC, Train_Name.Name"""
@@ -1639,17 +1659,9 @@ class GTTrains:
         self.winList[0].deiconify()
 
     def back(self):
-        try:
-            if(self.winList[-1]==self.travelInfo):
-                del self.fullTrainList[-1]
-                self.winList[-1].destroy()
-                self.winList.remove(self.winList[-1])
-                self.winList[-1].deiconify()
-                return
-        except:
-            self.winList[-1].destroy()
-            self.winList.remove(self.winList[-1])
-            self.winList[-1].deiconify()
+        self.winList[-1].destroy()
+        self.winList.remove(self.winList[-1])
+        self.winList[-1].deiconify()
 
     def Connect(self):
         try:
