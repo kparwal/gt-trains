@@ -1,0 +1,116 @@
+Roshan Balakrishnan
+Hasit Dewan
+Keshav Parwal
+Rikhil Shah
+Team 73
+
+1. SELECT Username,Email FROM Customer NATURAL LEFT JOIN Manager UNION SELECT Username,Email FROM Customer NATURAL RIGHT JOIN Manager
+    - Fetches usernames and emails from both the manager and customer tables. Used to verify that unique logins are made
+
+2. INSERT INTO Customer(Username,Password,Email)VALUES("{0}","{1}","{2}")
+    - Inserts into the Customer table a new user
+
+3. SELECT Password FROM Customer WHERE Username ="{}"
+    - Gets the username's specific password from customer
+
+4. SELECT Password FROM Manager WHERE Username ="{}"
+    - Gets the username's specific password from manager
+
+5. SELECT Train_Number FROM Train_Name WHERE Name = '{}'
+    - Gets the Train number from the train name table of a specific train
+
+6. SELECT * FROM Train_Stop WHERE Train_Number = '{}' ORDER BY Arrival_Time ASC
+    - Selects the whole row from the table and orders it in ascending order
+
+7. SELECT DISTINCT Station_Name FROM Station
+    - Gets a list of the unique station names
+
+8. SELECT `Name`, `Depart From`, `Arrive At`, `Departure_Time`, `Arrival_Time`, `First_Class_Price`, `Second_Class_Price` FROM
+    (SELECT `Name`, `Depart From`, `Arrive At`, `Departure_Time`, `Arrival_Time`, `C`.`Train_Number` FROM
+     (SELECT `A`.`Station_Name` AS `Depart From` , `B`.`Station_Name` AS `Arrive At` , `A`.`Train_Number` , `A`.`Departure_Time` , `B`.`Arrival_Time` FROM (SELECT *
+                FROM `Train_Stop`
+                NATURAL JOIN `Station`
+                WHERE `Station_Name` = '{}'
+                AND `Departure_Time` IS NOT NULL
+                ORDER BY `Station_Name` ASC
+                ) AS A
+                INNER JOIN (
+
+                SELECT *
+                FROM `Train_Stop`
+                NATURAL JOIN `Station`
+                WHERE `Station_Name` = '{}'
+                AND `Arrival_Time` IS NOT NULL
+                ORDER BY `Station_Name` ASC
+                ) AS B ON `A`.`Train_Number` = `B`.`Train_Number`) AS C INNER JOIN `Train_Name` AS D ON `C`.`Train_Number`=`D`.`Train_Number`)
+                AS E INNER JOIN `Train_Route` AS F ON `E`.`Train_Number`=`F`.`Train_Number`
+    - Calculates possible routes between two stations, and ensures that route direction is correct and that stations are different. Also appends any relevant information about the route
+
+9. SELECT Card_Num FROM Payment_Info WHERE C_Username = '{}'
+    - Gets the card numbers under a certain username
+
+10. INSERT INTO Payment_Info (Card_Num,CVV,Exp_Date,Name_on_card,C_Username) VALUES ('{}','{}','{}','{}','{}')
+    - Inserts into the payment info table a new card with set values
+
+11. SELECT `Departure_Date` FROM `Reserve_Train` NATURAL JOIN `Reservation` WHERE `Card_Num`='{}'
+    - Gets the departure dates and joins with card numbers. Can be used to compare departure date with removal of a card
+
+12. DELETE FROM Payment_Info WHERE Card_Num = '{}'
+    - Deletes a card from the table given a certain card number
+
+13. SELECT Student_Discount FROM System_Info
+    - Gets the student discount value from the table system_info
+
+14. SELECT Is_Student FROM Customer WHERE Username  = '{}'
+    - Retrieves whether a user is a student value from customer table
+
+15. INSERT INTO `Reservation` (`Is_Cancelled`, `C_Username`, `Card_Num`, `Total_Cost`) VALUES ('{}', '{}', '{}', '{}')
+    - Inserts a new reservation into the reservation table
+
+16. SELECT MAX(`ReservationID`) FROM `Reservation`
+    - Gets the largest reservation ID from the reservation table
+
+17. SELECT `Train_Number` from `Train_Name` WHERE `Name` = '{}'
+    - Gets the train number of a specified train
+
+18. INSERT INTO `Reserve_Train` (`ReservationID`, `Username`, `Passenger_Name`, `Departure_Date`, `First_Class`, `Departs_From`, `Arrives_At`, `Train_Number`, `Num_Baggage`) VALUES ('{}'," \"'{}', '{}', '{}', '{}', '{}', '{}', '{}','{}')
+    - Inserts into reserve_train a new row
+
+19. SELECT ReservationID FROM Reservation WHERE Is_Cancelled='0'
+    - Gets the reservation IDs of ones that are not cancelled
+
+20. SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost`, `Arrival_Time` FROM (SELECT * FROM
+                        (SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                            AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
+    - Calculates possible routes between two stations, and ensures that route direction is correct and that stations are different. Also appends any relevant information about the route
+
+21. UPDATE `cs4400_Team_73`.`Reservation` SET `Is_Cancelled` = 1, `Total_Cost` = {} WHERE `ReservationID` = {} AND `C_Username`='{}'
+    - Updates a reservation's is_cancelled field to be 1
+
+22. SELECT Train_Number FROM Train_Name WHERE Name ="{}"
+    - Gets the train number of a specified train name
+
+23. INSERT INTO Review(Comment,Rating,Train_Number,C_Username)VALUES("{0}","{1}","{2}","{3}")
+    - Inserts a new review into the review table
+
+24. SELECT Train_Number FROM Train_Name WHERE Name ="{}"
+    - Gets the train number of a specified train
+
+25. SELECT Comment,Rating FROM Review WHERE Train_Number ="{}" ORDER BY Rating ASC
+    - Gets all the comments and ratings of a specified train and orders them in ascending order
+
+26. UPDATE Customer SET Is_Student = "1" WHERE Username ="{}"
+    - Updates a customer to be a student by changing his/her is_student column
+
+27. SELECT Month, SUM(Total_Cost) FROM (SELECT MIN(MONTH(`Departure_Date`)) as Month, Total_Cost FROM Reservation JOIN Reserve_Train ON Reservation.`ReservationID`=Reserve_Train.`ReservationID` WHERE `Departure_Date` BETWEEN DATE_FORMAT(NOW() - INTERVAL 3 MONTH, '%Y-%m-01 00:00:00') AND DATE_FORMAT(LAST_DAY(NOW() - INTERVAL 1 MONTH), '%Y-%m-%d 23:59:59') GROUP BY Reserve_Train.`ReservationID` ORDER BY Month) AS A GROUP BY Month
+    - Gets the total cost for a month, combining reservations with the reservation's earliest month
+
+28. SELECT MONTH(Departure_Date) AS MONTH , Train_Name.Name, COUNT( Reserve_Train.ReservationID ) AS Number FROM Reservation JOIN Reserve_Train ON Reservation.`ReservationID` = Reserve_Train.`ReservationID` JOIN Train_Name ON Train_Name.Train_Number = Reserve_Train.Train_Number WHERE  `Departure_Date` BETWEEN DATE_FORMAT( NOW( ) - INTERVAL 3 MONTH ,  '%Y-%m-01 00:00:00' )
+    AND DATE_FORMAT( LAST_DAY( NOW( ) - INTERVAL 1
+    MONTH ) ,  '%Y-%m-%d 23:59:59' )
+    AND  `Is_Cancelled` =0
+    GROUP BY MONTH , Train_Name.Name
+    ORDER BY MONTH , Number DESC, Train_Name.Name
+    - Returns the train routes and the number of reservations for each, in order of popularity
+
+29.
