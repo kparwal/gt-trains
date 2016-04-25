@@ -1109,7 +1109,362 @@ class GTTrains:
         frame.pack()
 
     def setReservationUpdate(self):
-        print("Dost thou arthen an illiterate lethrblaka farmer?")
+        
+        
+
+        data = self.Connect()
+        cursor = data.cursor()
+      
+        search_sql = """
+                            SELECT `Name`, `Departure_Date`, `Departure_Time`, `Departs_From`, `Arrives_At`, `First_Class`, `Num_Baggage`, `Passenger_Name`, `Total_Cost`, `Arrival_Time` FROM (
+                            SELECT * FROM
+                            	(SELECT * FROM `Reservation` NATURAL JOIN `Reserve_Train` WHERE `Reserve_Train`.`ReservationID` = {} AND `Reservation`.`Is_Cancelled` != '1')
+                            AS A NATURAL JOIN `Train_Name`) AS B INNER JOIN `Train_Stop` ON `B`.`Departs_From` = `Train_Stop`.`Station_Name` WHERE `B`.`Train_Number`=`Train_Stop`.`Train_Number` AND `Username` = '{}'
+                         """.format(self.idNum.get(), self.username.get())
+        cursor.execute(search_sql)
+        self.searchlist1 = self.nested_tuple_to_list(cursor.fetchall(), False)
+        cursor.close()
+        data.close()
+
+        print(self.searchlist1)
+
+        if len(self.searchlist1) == 0:
+            messagebox.showerror("Error", "Please Enter a Valid Reservation ID")
+            return
+
+        self.reserveView.withdraw()
+        self.reserveUpdate = Toplevel()
+        self.reserveUpdate.title("Update Reservation")
+        self.winList.append(self.reserveUpdate)
+        frame=Frame(self.reserveUpdate)
+            
+
+        title = Label(frame, text="Update Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=0, columnspan=7)
+
+
+        label1 = Label(frame, text = "Train")
+        label1.grid(row = 1, column = 0)
+
+        label2 = Label(frame, text = "Time (Duration)")
+        label2.grid(row = 1, column = 1)
+
+        label3 = Label(frame, text = "Departs from")
+        label3.grid(row = 1, column = 2)
+
+        label4 = Label(frame, text = "Arrives at")
+        label4.grid(row = 1, column = 3)
+
+        label5 = Label(frame, text = "Class")
+        label5.grid(row = 1, column = 4)
+
+        label6 = Label(frame, text = "Price")
+        label6.grid(row = 1, column = 5)
+
+        label7 = Label(frame, text = "Number of baggages")
+        label7.grid(row = 1, column = 6)
+
+        label8 = Label(frame, text = "Passenger Name")
+        label8.grid(row = 1, column = 7)
+
+
+        rowCount = 8
+        colCount = 0
+
+        self.removeTracker = IntVar()
+        self.removeIndex = 0
+
+        for indi in self.searchlist1:
+            temp = Radiobutton(frame, text = indi[0], variable = self.removeTracker, value = self.removeIndex)
+            temp.grid(row = rowCount, column = colCount)    # col 0 has the train name
+            colCount = colCount + 1
+            self.removeIndex = self.removeIndex + 1
+
+            temp = Label(frame, text = indi[1]) # col 1 has the date
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[3]) # col 2 has the departure station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[4]) # col 3 has the arrival station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[5]) # col 4 has the class type
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[8]) # col 5 has the price
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[6]) # col 6 has baggage num
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(frame, text = indi[7]) # col 7 has the name
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+
+        searchButton = Button(frame, text="Next", command=self.submitUpdate)
+        searchButton.grid(row=99, column=2)
+
+        buttonBack = Button(frame, text="Back", command=self.back)
+        buttonBack.grid(row=99, column=1)
+
+        
+
+        frame.pack()
+        
+        
+
+    def submitUpdate(self):
+        self.reserveUpdate.withdraw()
+        self.subUpdate = Toplevel()
+        self.subUpdate.title("Update Reservation")
+        self.winList.append(self.subUpdate)
+        self.frame9=Frame(self.subUpdate)
+
+        self.newDateVar=StringVar()
+
+        title = Label(self.frame9, text="Update Reservation", fg="Blue", font="TkDefaultFont 24 bold")
+        title.grid(row=0, column=1, columnspan=8)
+
+        currentTicket = Label(self.frame9, text="Current Train Ticket", font="TkDefaultFont 12")
+        currentTicket.grid(row=1, column=1)
+
+        spaceLabel = Label(self.frame9)
+        spaceLabel.grid(row=2, column=0)
+        
+        label1 = Label(self.frame9, text = "Train", font="TkDefaultFont 10 bold")
+        label1.grid(row = 2, column = 1)
+
+        label2 = Label(self.frame9, text = "Time (Duration)", font="TkDefaultFont 10 bold")
+        label2.grid(row = 2, column = 2)
+
+        label3 = Label(self.frame9, text = "Departs from", font="TkDefaultFont 10 bold")
+        label3.grid(row = 2, column = 3)
+
+        label4 = Label(self.frame9, text = "Arrives at", font="TkDefaultFont 10 bold")
+        label4.grid(row = 2, column = 4)
+
+        label5 = Label(self.frame9, text = "Class", font="TkDefaultFont 10 bold")
+        label5.grid(row = 2, column = 5)
+
+        label6 = Label(self.frame9, text = "Price", font="TkDefaultFont 10 bold")
+        label6.grid(row = 2, column = 6)
+
+        label7 = Label(self.frame9, text = "Number of baggages", font="TkDefaultFont 10 bold")
+        label7.grid(row = 2, column = 7)
+
+        label8 = Label(self.frame9, text = "Passenger Name", font="TkDefaultFont 10 bold")
+        label8.grid(row = 2, column = 8)
+
+        spaceLabel = Label(self.frame9)
+        spaceLabel.grid(row=15, column=0, columnspan=8)
+
+        label9 = Label(self.frame9, text = "New Departure Date\n(YYYY-MM-DD): ")
+        label9.grid(row=20, column=1)
+
+        label9Entry = Entry(self.frame9, textvariable=self.newDateVar)
+        label9Entry.grid(row=20, column=2)
+
+        updateButton = Button(self.frame9, text="Update", command=self.showUpdate)
+        updateButton.grid(row=20, column=3)
+
+        rowCount = 8
+        colCount = 1
+        newList=[1]
+        for x in range(len(newList)):
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][0])
+            temp.grid(row = rowCount, column = colCount)    # col 0 has the train name
+            colCount = colCount + 1
+            #self.removeIndex = self.removeIndex + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][1]) # col 1 has the date
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][3]) # col 2 has the departure station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][4]) # col 3 has the arrival station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][5]) # col 4 has the class type
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][8]) # col 5 has the price
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][6]) # col 6 has baggage num
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][7]) # col 7 has the name
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+        buttonBack = Button(self.frame9, text="Back", command=self.back)
+        buttonBack.grid(row=999, column=1)
+
+        self.frame9.pack()
+            
+
+    def showUpdate(self):
+        
+        ticketDate = self.parseDate(self.searchlist1[self.removeTracker.get()][1])
+        #print(ticketDate - self.parseDate(self.newDateVar.get()))
+        if (ticketDate - datetime.date.today() < datetime.timedelta(1)):
+            messagebox.showerror("Error", "Update Must Be Made at Least 1 day Earlier than Departure Date")
+            return
+
+        if (self.parseDate(self.newDateVar.get()) - datetime.date.today() < datetime.timedelta(1)):
+            messagebox.showerror("Error", "Can't Update, TOO SOON")
+            return
+
+        messagebox.showinfo("Success", "Date Updated")
+            
+            
+        self.changeFeeVar = IntVar()
+        self.changeFeeVar.set(50)
+
+        data = self.Connect()
+        cursor = data.cursor()
+        q = "SELECT Total_Cost FROM Reservation WHERE ReservationID = '{}'".format(self.idNum.get())
+
+        tCost = cursor.execute(q)
+        tCost = cursor.fetchall()[0][0]
+        
+        self.upTotalCost = DoubleVar()
+        totalCost = tCost + self.changeFeeVar.get()
+        self.upTotalCost.set(totalCost)
+        
+
+        updateTicketq = "UPDATE Reserve_Train SET Departure_Date = '{}' WHERE ReservationID = '{}'".format(self.newDateVar.get(), self.idNum.get())
+        cursor.execute(updateTicketq)
+
+        upTicketq = "UPDATE Reservation SET Total_Cost = '{}' WHERE ReservationID = '{}'".format(self.upTotalCost.get(), self.idNum.get())
+        cursor.execute(upTicketq)
+        
+        
+        data.commit()
+        cursor.close()
+        data.close()
+
+
+        
+        spaceLabel = Label(self.frame9)
+        spaceLabel.grid(row=22, column=0)
+        
+        label1 = Label(self.frame9, text = "Train", font="TkDefaultFont 10 bold")
+        label1.grid(row = 23, column = 1)
+
+        label2 = Label(self.frame9, text = "Time (Duration)", font="TkDefaultFont 10 bold")
+        label2.grid(row = 23, column = 2)
+
+        label3 = Label(self.frame9, text = "Departs from", font="TkDefaultFont 10 bold")
+        label3.grid(row = 23, column = 3)
+
+        label4 = Label(self.frame9, text = "Arrives at", font="TkDefaultFont 10 bold")
+        label4.grid(row = 23, column = 4)
+
+        label5 = Label(self.frame9, text = "Class", font="TkDefaultFont 10 bold")
+        label5.grid(row = 23, column = 5)
+
+        label6 = Label(self.frame9, text = "Price", font="TkDefaultFont 10 bold")
+        label6.grid(row = 23, column = 6)
+
+        label7 = Label(self.frame9, text = "Number of baggages", font="TkDefaultFont 10 bold")
+        label7.grid(row = 23, column = 7)
+
+        label8 = Label(self.frame9, text = "Passenger Name", font="TkDefaultFont 10 bold")
+        label8.grid(row = 23, column = 8)
+
+        spaceLab = Label(self.frame9)
+        spaceLab.grid(row=44, column=1)
+
+        label9 = Label(self.frame9, text = "Change Fee")
+        label9.grid(row=45, column=1)
+
+        label9Entry = Entry(self.frame9, textvariable=self.changeFeeVar, state='disabled')
+        label9Entry.grid(row=45, column=2)
+
+        spaceLab1 = Label(self.frame9)
+        spaceLab1.grid(row=46, column=1)
+        
+        label10 = Label(self.frame9, text = "Updated Total Cost")
+        label10.grid(row=47, column=1)
+
+        label10Entry = Entry(self.frame9, textvariable=self.upTotalCost, state='disabled')
+        label10Entry.grid(row=47, column=2)
+
+
+        
+
+        
+
+            
+        self.searchlist1[self.removeTracker.get()][1] = self.parseDate(self.newDateVar.get())
+
+        self.searchlist1[self.removeTracker.get()][8] = self.upTotalCost.get()
+        
+        rowCount = 24
+        colCount = 1
+        newList=[1]
+        for x in range(len(newList)):
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][0])
+            temp.grid(row = rowCount, column = colCount)    # col 0 has the train name
+            colCount = colCount + 1
+            #self.removeIndex = self.removeIndex + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][1]) # col 1 has the date
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][3]) # col 2 has the departure station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][4]) # col 3 has the arrival station
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][5]) # col 4 has the class type
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][8]) # col 5 has the price
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][6]) # col 6 has baggage num
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            temp = Label(self.frame9, text = self.searchlist1[self.removeTracker.get()][7]) # col 7 has the name
+            temp.grid(row = rowCount, column = colCount)
+            colCount = colCount + 1
+
+            colCount = 0
+            rowCount = rowCount + 1
+
+        
+
+        self.frame9.pack()
 
     def cancelReservation(self):
         self.cancelReservationID = StringVar()
