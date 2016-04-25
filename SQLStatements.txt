@@ -113,4 +113,5 @@ Team 73
     ORDER BY MONTH , Number DESC, Train_Name.Name
     - Returns the train routes and the number of reservations for each, in order of popularity
 
-29.
+29.SELECT Card_NUM FROM Payment_Info WHERE Card_Num = '{}
+   -Checks if card is being used
