@@ -1611,7 +1611,11 @@ class GTTrains:
         self.refund_percentage = 0.0
         for result in searchlist:
             date = self.parseDate(result[1])
-            advance = int(str(date - datetime.date.today()).split(' ')[0])
+            try:
+                advance = int(str(date - datetime.date.today()).split(' ')[0])
+            except:
+                messagebox.showerror("Error", "Cannot cancel on same day")
+                return
             if advance < days_before:
                 days_before = advance
             trainsDict[result[0]] = result[1:8]
