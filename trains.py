@@ -1067,6 +1067,7 @@ class GTTrains:
         if(len(self.fullTrainList) == 0):
             messagebox.showerror("Empty Reservation", "Cannot submit empty reservations!")
             self.funcBack()
+            return
 
         self.make1.withdraw()
 
