@@ -635,7 +635,7 @@ class GTTrains:
         nextB = Button(frame, text = "Next", command = self.updateFullList)
         nextB.grid(row =7 , column = 1, sticky=EW)
 
-        backB = Button(frame, text = "Back", command=self.back)
+        backB = Button(frame, text = "Back", command=self.backSpecial1)
         backB.grid(row = 7, column = 0, sticky=EW)
 
         frame.pack()
@@ -829,6 +829,8 @@ class GTTrains:
         removeIndex = self.removeTracker.get()
 
         del self.fullTrainList[removeIndex]
+        del self.winList[-1]
+
         self.makeReservation()
 
     def addMore(self):
@@ -967,6 +969,11 @@ class GTTrains:
 
     def removeCard(self):
         cardSelect = self.fullCardList[self.cardChosen1.get()]
+
+        if (self.cardChosen1.get() == ""):
+            valid = False
+            messagebox.showerror("Error", "Please select a card")
+            return
 
         data = self.Connect()
         cursor = data.cursor()
@@ -2071,6 +2078,13 @@ class GTTrains:
         self.winList[-1].deiconify()
         self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
         self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-2])
+
+    def backSpecial1(self):
+        self.winList[-1].destroy()
+        self.winList.remove(self.winList[-1])
+        self.winList[-1].deiconify()
+
+        del self.fullTrainList[len(self.fullTrainList) - 1]
 
     def funcBack(self):
         for window in self.winList[1:]:
