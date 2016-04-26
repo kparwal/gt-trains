@@ -644,10 +644,17 @@ class GTTrains:
     def updateFullList(self):
         if(self.passengerName.get()==""):
             messagebox.showerror("Name Missing","Please input a Passenger Name.")
-
             return
 
         self.fullTrainList[len(self.fullTrainList) - 1] = self.fullTrainList[len(self.fullTrainList) - 1] + [self.passengerName.get(), self.baggageNum.get()]
+        for x in range(len(self.fullTrainList[:-1])):
+            for y in range(len(self.fullTrainList[x+1:])):
+                if self.fullTrainList[:-1][x]==self.fullTrainList[x+1:][y]:
+                    messagebox.showerror("Same Reservation","Please input a New Passenger Name.")
+                    self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
+                    self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
+                    return
+
         self.makeReservation()
 
     def makeReservation(self):
@@ -2017,16 +2024,20 @@ class GTTrains:
         for data in datalist:
             revDict.append([datetime.date(1900, data[0], 1).strftime('%B'),data[1],data[2]])
 
+        tempList = []
         monthcounter = 0
         month = ""
-        for data in revDict:
-            if month == data[0]:
+        for x in range(len(revDict)):
+            if month == revDict[x][0]:
                 monthcounter += 1
-                if monthcounter>2:
-                    revDict.remove(data)
+                if monthcounter<=3:
+                    tempList.append(revDict[x])
             else:
                 monthcounter = 1
-                month = data[0]
+                month = revDict[x][0]
+                tempList.append(revDict[x])
+
+        revDict=tempList
 
         for x in range(len(revDict)):
             if month == revDict[x][0]:
@@ -2077,7 +2088,7 @@ class GTTrains:
         self.winList.remove(self.winList[-1])
         self.winList[-1].deiconify()
         self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
-        self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-2])
+        self.fullTrainList[len(self.fullTrainList) - 1].remove(self.fullTrainList[len(self.fullTrainList) - 1][-1])
 
     def backSpecial1(self):
         self.winList[-1].destroy()
